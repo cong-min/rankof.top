@@ -161,7 +161,7 @@ function saveSong (track, dbSongs, cb) {
 function run (db) {
   const dbPlaylists = db.collection('music.163.com:playlists');
   const dbSongs = db.collection('music.163.com:songs');
-  const beginPage = 12;     // 开始页数
+  const beginPage = 0;     // 开始页数
   const endPage = 42;       // 结束页数
   const pages = new Array(endPage-beginPage+1).fill(0).map((e, i) => i + beginPage);
   // 爬取所有歌单开始时间
