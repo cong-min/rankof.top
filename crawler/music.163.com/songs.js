@@ -1,67 +1,11 @@
-/* crawler */
+/* crawler - music.163.com - songs
+ * 获取所有的歌曲及其评论
+ * @ Cong Min */
 const request = require('superagent');
 const cheerio = require('cheerio');
 const async = require('async');
-const Crypto = require('./Crypto.js');
 const db = require('../../server/db.js');
-
-// 请求头
-const getHeader = {
-  'Accept': '*/*',
-  'Accept-Encoding': 'gzip, deflate',
-  'Accept-Language': 'zh-CN,zh;q=0.8,en;q=0.6',
-  'Connection': 'keep-alive',
-  'Referer': 'http://music.163.com',
-  'Origin': 'http://music.163.com',
-  'Host': 'music.163.com',
-  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.1 Safari/603.1.30',
-  'Cookie': '_ntes_nnid=03139688b8dba6ef0980fc7da1bc5ce9,1491734404984; _ntes_nuid=03139688b8dba6ef0980fc7da1bc5ce9; JSESSIONID-WYYY=tmnKElJyBCKyxajzJQxJShgsbs0vi6rkx1fxOp61ETD15GPyHEh9tm6H33ldgWBGmqnJxt5yp%2BgClg%2B0TN1wEH4UqnSdqaVtjwl6vRJ74ZEp5N%2F5Vzwg9XVGzgZ48d4kCIwM3Bi70Nxa8OgZpbpYBbyhKDhRcXVUjvAb%2FEeD9gFyr2Uo%3A1491816035530; _iuqxldmzr_=32; __utma=94650624.2032956978.1491734408.1491807812.1491814236.6; __utmb=94650624.2.10.1491814236; __utmc=94650624; __utmz=94650624.1491734408.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)'
-};
-const postHeader = Object.assign({}, getHeader, {
-  'Content-Type': 'application/x-www-form-urlencoded'
-});
-
-// 加密算法
-const authentication = Crypto.aesRsaEncrypt(JSON.stringify({
-  'username': '',
-  'password': '',
-  'rememberLogin': 'true'
-}));
-
-
-// 获取歌单列表
-function getPlaylists (page) {
-  return new Promise((resolve, reject) => {
-    request.get('http://music.163.com/api/playlist/list')
-      .query({ order: 'hot', cat: '全部', limit: 35, offset: 35*page, csrf_token: '' })
-      .set(getHeader)
-      .end((err, res) => {
-        if (err) { reject({ hint: `获取第<${page+1}>页歌单列表失败`, err }); return; }
-        if (res.text) {
-          const { playlists } = JSON.parse(res.text);
-          if (!playlists.length) { reject({ hint: `无第<${page+1}>页歌单列表` }); return; }
-          resolve(playlists);
-        }
-      });
-  });
-}
-
-// 获取歌单信息
-function getPlaylist (id) {
-  return new Promise((resolve, reject) => {
-    request.get('http://music.163.com/api/playlist/detail')
-      .query({ id, csrf_token: '' })
-      .set(getHeader)
-      .end((err, res) => {
-        if (err) { reject({ hint: `🔥获取<${id}>歌单信息失败`, err }); return; }
-        if (res.text) {
-          const { result } = JSON.parse(res.text);
-          if (!result) { reject({ hint: `📑无歌单<${id}>` }); return; }
-          resolve(result);
-        }
-      });
-  });
-}
+const { getHeader, postHeader, authentication } = require('./config.js');
 
 // 获取歌曲信息
 function getSong (id) {
@@ -208,7 +152,7 @@ function run (db) {
           console.info(`📑第${page+1}页歌单抓取完毕！`);
           console.info(`🕓本页歌单耗时: ${(pageEnd-pageStart)/1000}s`,
             `总耗时: ${(pageEnd-start.getTime())/1000}s`);
-          console.info(`⏳进度: ${page}/${endPage}页\n`);
+          console.info(`⏳进度: ${page+1}/${endPage}页\n`);
         }
         pageNext();
       });
