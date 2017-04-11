@@ -8,7 +8,10 @@ const db = require('../../server/db.js');
 // 请求头
 const getHeader = {
   'Accept': '*/*',
-  'Referer': 'http://music.163.com/',
+  'Accept-Encoding': 'gzip, deflate',
+  'Accept-Language': 'zh-CN,zh;q=0.8,en;q=0.6',
+  'Connection': 'keep-alive',
+  'Referer': 'http://music.163.com',
   'Origin': 'http://music.163.com',
   'Host': 'music.163.com',
   'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.1 Safari/603.1.30',
@@ -30,7 +33,7 @@ const authentication = Crypto.aesRsaEncrypt(JSON.stringify({
 function getPlaylists (page) {
   return new Promise((resolve, reject) => {
     request.get('http://music.163.com/api/playlist/list')
-      .query({ order: 'hot', cat: '全部', limit: 35, offset: 35*page })
+      .query({ order: 'hot', cat: '全部', limit: 35, offset: 35*page, csrf_token: '' })
       .set(getHeader)
       .end((err, res) => {
         if (err) { reject({ hint: `获取第<${page+1}>页歌单列表失败`, err }); return; }
@@ -47,7 +50,7 @@ function getPlaylists (page) {
 function getPlaylist (id) {
   return new Promise((resolve, reject) => {
     request.get('http://music.163.com/api/playlist/detail')
-      .query({ id })
+      .query({ id, csrf_token: '' })
       .set(getHeader)
       .end((err, res) => {
         if (err) { reject({ hint: `🔥获取<${id}>歌单信息失败`, err }); return; }
@@ -64,7 +67,7 @@ function getPlaylist (id) {
 function getSong (id) {
   return new Promise((resolve, reject) => {
     request.get('http://music.163.com/api/song/detail')
-      .query({ id, ids: `[${id}]` })
+      .query({ id, ids: `[${id}]`, csrf_token: '' })
       .set(getHeader)
       .end((err, res) => {
         if (err) { reject({ hint: `🔥获取歌曲<${id}>信息失败`, err }); return; }
@@ -80,7 +83,7 @@ function getSong (id) {
 // 获取歌曲评论
 function getSongComment ({ id, name, comment }) {
   return new Promise((resolve, reject) => {
-    request.post(`http://music.163.com/weapi/v1/resource/comments/${comment.id}`)
+    request.post(`http://music.163.com/weapi/v1/resource/comments/${comment.id}/?csrf_token=`)
       .set(postHeader)
       .send(authentication)
       .end((err, res) => {
@@ -181,7 +184,7 @@ function run (db) {
           // 异步并发获取歌曲信息
           // 爬取歌单开始时间
           const playlistStart = new Date().getTime();
-          async.mapLimit(playlistDetail.tracks, 2, (track, trackNext) => {
+          async.mapLimit(playlistDetail.tracks, 3, (track, trackNext) => {
             saveSong(track, dbSongs, trackNext);
           }, (err, res) => {
             if (err) { console.error(err); } else {
