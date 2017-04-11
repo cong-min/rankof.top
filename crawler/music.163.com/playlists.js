@@ -145,7 +145,10 @@ function run(db) {
         pageNext();
       });
 
-    }).catch(catchPromiseError);
+    }).catch(() => {
+      catchPromiseError();
+      pageNext();
+    });
   }, (err, res) => {
     if (err) { console.error(err); } else {
       db.close();   // 关闭数据库连接
