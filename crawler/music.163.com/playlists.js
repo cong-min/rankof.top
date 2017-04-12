@@ -145,8 +145,8 @@ function run(db) {
         pageNext();
       });
 
-    }).catch(() => {
-      catchPromiseError();
+    }).catch(err => {
+      catchPromiseError(err);
       pageNext();
     });
   }, (err, res) => {
