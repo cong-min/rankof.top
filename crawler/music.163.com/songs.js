@@ -115,7 +115,10 @@ function run(db) {
           recordNext();
         });
 
-      }).catch(catchPromiseError);
+      }).catch(err => {
+        catchPromiseError(err);
+        recordNext();
+      });
     }, (err, res) => {
       if (err) { console.error(err); } else {
         process.nextTick(callback);   // next
