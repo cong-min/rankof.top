@@ -25,16 +25,16 @@ function getSong(id) {
 }
 
 // 获取歌曲评论
-function getSongComment({ id, name, comment }) {
+function getSongComment({ _id, name, comment }) {
   return new Promise((resolve, reject) => {
     request.post(`http://music.163.com/weapi/v1/resource/comments/${comment.id}/?csrf_token=`)
       .set(postHeader)
       .send(authentication)
       .end((err, res) => {
-        if (err) { reject({ hint: `🔥获取 <${id}:${name}> 评论失败`, err }); return; }
+        if (err) { reject({ hint: `🔥获取 <${_id}:${name}> 评论失败`, err }); return; }
         if (res.text) {
           const { total, hotComments } = JSON.parse(res.text);
-          if (!total) { reject({ hint: `💿歌曲 <${id}:${name}> 无评论` }); return; }
+          if (!total) { reject({ hint: `💿歌曲 <${_id}:${name}> 无评论` }); return; }
           resolve({ commentId: comment.id, total, hotComment: hotComments[0] });
         }
       });
@@ -99,7 +99,7 @@ function run(db) {
   // 每读取10个数据执行一次toDo
   function toDo(records, callback) {
     // 异步并发获取歌曲评论
-    async.mapLimit(records, 2, (record, recordNext) => {
+    async.mapLimit(records, 1, (record, recordNext) => {
       // 爬取歌曲评论开始时间
       const songStart = new Date().getTime();
       getSongComment(record).then(comment => {
