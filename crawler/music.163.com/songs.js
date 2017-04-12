@@ -63,7 +63,7 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
     // 保存歌曲
     dbSongs.update({ _id: song._id }, { $set: { comment: songComment } }, function(err, res) {
       if (err) { console.error(`🔥歌曲 <${song._id}:${song.name}> 录入数据库失败`, err); }
-      else { console.info(`💿歌曲 <${song._id}:${song.name}> 抓取成功`); }
+      else { console.info(`💿歌曲 <${song._id}:${song.name}> 录入成功`); }
       resolve();
     });
   });
@@ -115,9 +115,9 @@ function run(db) {
           recordNext();
         });
 
-      }).catch(err => {
-        catchPromiseError(err);
-        recordNext();
+      }).catch(error => {
+        catchPromiseError(error);
+        if (!error.err) { recordNext(); }
       });
     }, (err, res) => {
       if (err) { console.error(err); } else {
