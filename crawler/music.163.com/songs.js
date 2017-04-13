@@ -5,6 +5,12 @@ const request = require('superagent');
 const cheerio = require('cheerio');
 const async = require('async');
 const db = require('../../server/db.js');
+const readline = require('readline');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
 const { getHeader, postHeader, authentication } = require('./config.js');
 
 // 获取歌曲信息
@@ -13,8 +19,9 @@ function getSong(id) {
     request.get('http://music.163.com/api/song/detail')
       .query({ id, ids: `[${id}]`, csrf_token: '' })
       .set(getHeader)
+      .retry()
       .end((err, res) => {
-        if (err) { reject({ hint: `🔥获取歌曲<${id}>信息失败`, err }); return; }
+        if (err) { reject({ hint: `🔥获取歌曲 <${id}> 信息失败`, err }); return; }
         if (res.text) {
           const { songs } = JSON.parse(res.text);
           if (!songs[0]) { reject({ hint: `💿无歌曲<${id}>` }); return; }
@@ -30,6 +37,7 @@ function getSongComment({ _id, name, comment }) {
     request.post(`http://music.163.com/weapi/v1/resource/comments/${comment.id}/?csrf_token=`)
       .set(postHeader)
       .send(authentication)
+      .retry()
       .end((err, res) => {
         if (err) { reject({ hint: `🔥获取 <${_id}:${name}> 评论失败`, err }); return; }
         if (res.text) {
@@ -69,6 +77,29 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
   });
 }
 
+// 运行爬取歌曲评论
+function runSongComment(record, recordNext, dbSongs, cb) {
+  getSongComment(record).then(comment => {
+
+    // 保存歌曲评论
+    saveSongComment(record, comment, dbSongs).then(() => {
+      typeof cb === "function" && cb();
+      recordNext();
+    });
+
+  }).catch(error => {
+    catchPromiseError(error);
+    if (error.err) {
+      // 请求失败，重试或跳过
+      rl.question('🚩是否重试? [ yes:重试 / no:跳过 ]', (answer) => {
+        if (answer === 'yes') { runSongComment(record, recordNext) }
+        else if (answer === 'no') { recordNext(); }
+        rl.close();
+      });
+    } else { recordNext(); }
+  });
+}
+
 // 运行爬虫
 function run(db) {
   const dbSongs = db.collection('music.163.com:songs');
@@ -95,37 +126,6 @@ function run(db) {
       });
     }
   });
-
-  // 每读取10个数据执行一次toDo
-  function toDo(records, callback) {
-    // 异步并发获取歌曲评论
-    async.mapLimit(records, 1, (record, recordNext) => {
-      // 爬取歌曲评论开始时间
-      const songStart = new Date().getTime();
-      getSongComment(record).then(comment => {
-
-        // 保存歌曲评论
-        saveSongComment(record, comment, dbSongs).then(() => {
-          const songEnd = new Date().getTime();
-          console.info(`💿歌曲 <${record._id}:${record.name}> 评论抓取完毕！`);
-          console.info(`🕓本歌曲评论耗时: ${(songEnd-songStart)/1000}s`,
-            `总耗时: ${(songEnd-start.getTime())/1000}s`);
-          console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲]\n`);
-          songIndex++;
-          recordNext();
-        });
-
-      }).catch(error => {
-        catchPromiseError(error);
-        if (!error.err) { recordNext(); }
-      });
-    }, (err, res) => {
-      if (err) { console.error(err); } else {
-        process.nextTick(callback);   // next
-      }
-    });
-  }
-
   stream.on('end', () => {
     db.close();
     // 爬取所有歌单结束时间
@@ -136,8 +136,33 @@ function run(db) {
     console.info(`🕓耗时: ${(end.getTime()-start.getTime())/1000}s\n`);
   });
   stream.on('close', () => { console.log('query closed'); });
+
+  // 每读取10个数据执行一次toDo
+  function toDo(records, callback) {
+    // 异步并发获取歌曲评论
+    async.mapLimit(records, 2, (record, recordNext) => {
+
+      // 爬取歌曲评论开始时间
+      const songStart = new Date().getTime();
+      runSongComment(record, recordNext, dbSongs, () => {
+        const songEnd = new Date().getTime();
+        console.info(`💿歌曲 <${record._id}:${record.name}> 评论抓取完毕！`);
+        console.info(`🕓本歌曲评论耗时: ${(songEnd-songStart)/1000}s`,
+          `总耗时: ${(songEnd-start.getTime())/1000}s`);
+        console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲]\n`);
+        songIndex++;
+      });
+
+    }, (err, res) => {
+      if (err) { console.error(err); } else {
+        process.nextTick(callback);   // next
+      }
+    });
+  }
+
 }
 
+// 打开数据库，开启运行
 db.open((err, db) => {
   if (err) { console.error(err); } else {
     run(db);

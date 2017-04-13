@@ -5,14 +5,21 @@ const request = require('superagent');
 const cheerio = require('cheerio');
 const async = require('async');
 const db = require('../../server/db.js');
+const readline = require('readline');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
 const { getHeader, postHeader, authentication } = require('./config.js');
 
 // 获取歌单列表
-function getPlaylists(page) {
+function getPlaylistList(page) {
   return new Promise((resolve, reject) => {
     request.get('http://music.163.com/api/playlist/list')
       .query({ order: 'hot', cat: '全部', limit: 35, offset: 35*page, csrf_token: '' })
       .set(getHeader)
+      .retry()
       .end((err, res) => {
         if (err) { reject({ hint: `获取第 <${page+1}> 页歌单列表失败`, err }); return; }
         if (res.text) {
@@ -30,6 +37,7 @@ function getPlaylist(id) {
     request.get('http://music.163.com/api/playlist/detail')
       .query({ id, csrf_token: '' })
       .set(getHeader)
+      .retry()
       .end((err, res) => {
         if (err) { reject({ hint: `🔥获取 <${id}> 歌单信息失败`, err }); return; }
         if (res.text) {
@@ -96,59 +104,85 @@ function saveSong(tracks, dbSongs) {
   });
 }
 
+// 运行爬取歌单列表
+function runPlaylistList(page, pageNext, dbPlaylists, dbSongs, playlistListCb, { start, endPage }) {
+  getPlaylistList(page).then(playlists => {
+
+    // 异步并发获取歌单详情
+    let playlistIndex = 0;  // 以下歌单所位于本页的序号
+    async.mapLimit(playlists, 2, (playlist, playlistNext) => {
+
+      // 爬取单个歌单开始时间
+      const playlistStart = new Date().getTime();
+      runPlaylist(playlist, playlistNext, dbPlaylists, dbSongs, (playlistDetail) => {
+        // 爬取单个歌单结束时间
+        const playlistEnd = new Date().getTime();
+        console.info(`📑歌单 <${playlistDetail.id}:${playlistDetail.name}> 抓取完毕！`);
+        console.info(`🕓本歌单耗时: ${(playlistEnd-playlistStart)/1000}s`,
+          `总耗时: ${(playlistEnd-start.getTime())/1000}s`);
+        console.info(`⏳进度: [${page+1}/${endPage+1}页]`,
+          `[${playlistIndex+1}/${playlists.length}歌单]\n`);
+        playlistIndex++;
+      });
+
+    }, (err, res) => {
+      if (err) { console.error(err); } else {
+        typeof playlistListCb === "function" && playlistListCb();
+      }
+      pageNext();
+    });
+
+  }).catch(error => {
+    catchPromiseError(error);
+    if (error.err) {
+      // 请求失败，重试或跳过
+      rl.question('🚩是否重试? [ yes:重试 / no:跳过 ]', (answer) => {
+        if (answer === 'yes') { runSongComment(record, recordNext) }
+        else if (answer === 'no') { recordNext(); }
+        rl.close();
+      });
+    } else { pageNext(); }
+  });
+
+}
+
+// 运行爬取歌单
+function runPlaylist(playlist, playlistNext, dbPlaylists, dbSongs, playlistCb) {
+  getPlaylist(playlist.id).then(playlistDetail => {
+
+    // 保存歌单
+    savePlaylist(playlistDetail, dbPlaylists).then(() => {
+      // 处理数据并保存歌单内的歌曲
+      saveSong(playlistDetail.tracks, dbSongs).then(() => {
+        typeof playlistCb === "function" && playlistCb(playlistDetail);
+        playlistNext();
+      });
+    });
+
+  }).catch(catchPromiseError);
+}
+
 // 运行爬虫
 function run(db) {
   const dbPlaylists = db.collection('music.163.com:playlists');
   const dbSongs = db.collection('music.163.com:songs');
   const [beginPage, endPage] = [0, 43];   // 开始页数, 结束页数
   const pages = new Array(endPage-beginPage+1).fill(beginPage).map((e, i) => i + e);
-  // 异步并发获取歌单列表
   // 爬取所有歌单开始时间
   const start = new Date();
+  // 异步并发获取歌单列表
   async.mapLimit(pages, 1, (page, pageNext) => {
-    getPlaylists(page).then(playlists => {
 
-      // 异步并发获取歌单详情
-      // 爬取本页歌单开始时间
-      const pageStart = new Date().getTime();
-      let playlistIndex = 0;  // 以下歌单所位于本页的序号
-      async.mapLimit(playlists, 1, (playlist, playlistNext) => {
-        // 爬取单个歌单开始时间
-        const playlistStart = new Date().getTime();
-        getPlaylist(playlist.id).then(playlistDetail => {
+    // 爬取本页歌单开始时间
+    const pageStart = new Date().getTime();
+    runPlaylistList(page, pageNext, dbPlaylists, dbSongs, () => {
+      // 爬取本页歌单结束时间
+      const pageEnd = new Date().getTime();
+      console.info(`📑第 [${page+1}/${endPage+1}] 页歌单抓取完毕！`);
+      console.info(`🕓本页歌单耗时: ${(pageEnd-pageStart)/1000}s`,
+        `总耗时: ${(pageEnd-start.getTime())/1000}s`);
+    }, { start, endPage });
 
-          // 保存歌单
-          savePlaylist(playlistDetail, dbPlaylists).then(() => {
-            // 处理数据并保存歌单内的歌曲
-            saveSong(playlistDetail.tracks, dbSongs).then(() => {
-              // 爬取单个歌单结束时间
-              const playlistEnd = new Date().getTime();
-              console.info(`📑歌单 <${playlistDetail.id}:${playlistDetail.name}> 抓取完毕！`);
-              console.info(`🕓本歌单耗时: ${(playlistEnd-playlistStart)/1000}s`,
-                `总耗时: ${(playlistEnd-start.getTime())/1000}s`);
-              console.info(`⏳进度: [${page+1}/${endPage+1}页]`,
-                `[${playlistIndex+1}/${playlists.length}歌单]\n`);
-              playlistIndex++;
-              playlistNext();
-            });
-          });
-
-        }).catch(catchPromiseError);
-      }, (err, res) => {
-        if (err) { console.error(err); } else {
-          // 爬取本页歌单结束时间
-          const pageEnd = new Date().getTime();
-          console.info(`📑第 [${page+1}/${endPage+1}] 页歌单抓取完毕！`);
-          console.info(`🕓本页歌单耗时: ${(pageEnd-pageStart)/1000}s`,
-            `总耗时: ${(pageEnd-start.getTime())/1000}s`);
-        }
-        pageNext();
-      });
-
-    }).catch(err => {
-      catchPromiseError(err);
-      pageNext();
-    });
   }, (err, res) => {
     if (err) { console.error(err); } else {
       db.close();   // 关闭数据库连接
@@ -160,8 +194,10 @@ function run(db) {
       console.info(`🕓耗时: ${(end.getTime()-start.getTime())/1000}s\n`);
     }
   });
+
 }
 
+// 打开数据库，开启运行
 db.open((err, db) => {
   if (err) { console.error(err); } else {
     run(db);
