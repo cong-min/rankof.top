@@ -78,22 +78,24 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
 }
 
 // 运行爬取歌曲评论
-function runSongComment(record, recordNext, dbSongs, cb) {
+function runSongComment(...params) {
+  const [record, recordNext, dbSongs, cb] = params;
   getSongComment(record).then(comment => {
 
     // 保存歌曲评论
     saveSongComment(record, comment, dbSongs).then(() => {
-      typeof cb === "function" && cb();
+      typeof cb === 'function' && cb();
       recordNext();
     });
 
   }).catch(error => {
     catchPromiseError(error);
     if (error.err) {
-      // 请求失败，重试或跳过
-      rl.question('🚩是否重试? [ yes:重试 / no:跳过 ]', (answer) => {
-        if (answer === 'yes') { runSongComment(record, recordNext) }
-        else if (answer === 'no') { recordNext(); }
+      // 请求失败，跳过或重试
+      rl.question('🚩是否跳过? [ yes:跳过 / no:重试 ]\t', (answer = 'no') => {
+        if (answer === 'yes') { recordNext(); } else {
+          runSongComment(...params);
+        }
         rl.close();
       });
     } else { recordNext(); }
@@ -139,25 +141,34 @@ function run(db) {
 
   // 每读取10个数据执行一次toDo
   function toDo(records, callback) {
-    // 异步并发获取歌曲评论
-    async.mapLimit(records, 2, (record, recordNext) => {
+    let millisec = 0;
+    if (!(songIndex+1)%3000) {
+      // 每爬取3000个数据，休息3分钟
+      millisec = 180 * 1000;
+      console.log('🕓休息3分钟', new Date());
+    }
+    setTimeout(() => {
+      // 异步并发获取歌曲评论
+      async.mapLimit(records, 2, (record, recordNext) => {
 
-      // 爬取歌曲评论开始时间
-      const songStart = new Date().getTime();
-      runSongComment(record, recordNext, dbSongs, () => {
-        const songEnd = new Date().getTime();
-        console.info(`💿歌曲 <${record._id}:${record.name}> 评论抓取完毕！`);
-        console.info(`🕓本歌曲评论耗时: ${(songEnd-songStart)/1000}s`,
-          `总耗时: ${(songEnd-start.getTime())/1000}s`);
-        console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲]\n`);
-        songIndex++;
+        // 爬取歌曲评论开始时间
+        const songStart = new Date().getTime();
+        runSongComment(record, recordNext, dbSongs, () => {
+          // 爬取歌曲评论结束时间
+          const songEnd = new Date().getTime();
+          console.info(`💿歌曲 <${record._id}:${record.name}> 评论抓取完毕！`);
+          console.info(`🕓本歌曲评论耗时: ${(songEnd-songStart)/1000}s`,
+            `总耗时: ${(songEnd-start.getTime())/1000}s`);
+          console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲]\n`);
+          songIndex++;
+        });
+
+      }, (err, res) => {
+        if (err) { console.error(err); } else {
+          process.nextTick(callback);   // next
+        }
       });
-
-    }, (err, res) => {
-      if (err) { console.error(err); } else {
-        process.nextTick(callback);   // next
-      }
-    });
+    }, millisec);
   }
 
 }
