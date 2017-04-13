@@ -17,7 +17,7 @@ const { getHeader, postHeader, authentication } = require('./config.js');
 function getPlaylistList(page) {
   return new Promise((resolve, reject) => {
     request.get('http://music.163.com/api/playlist/list')
-      .query({ order: 'hot', cat: '全部', limit: 35, offset: 35*page, csrf_token: '' })
+      .query({ order: 'hot', cat: '全部', limit: 35, offset: 35*page })
       .set(getHeader)
       .retry()
       .end((err, res) => {
@@ -164,7 +164,7 @@ function runPlaylist(...params) {
     catchPromiseError(error);
     if (error.err) {
       // 请求失败，跳过或重试
-      rl.question('🚩是否跳过? [ yes:跳过 / no:重试 ]\t', (answer = 'no') => {
+      rl.question('🚩是否跳过? [ yes:跳过 / no:重试 (默认) ]\t', (answer = 'no') => {
         consoe.log(answer);
         if (answer === 'yes') { playlistNext(); } else {
           runPlaylist(...params);

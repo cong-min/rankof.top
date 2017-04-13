@@ -17,7 +17,7 @@ const { getHeader, postHeader, authentication } = require('./config.js');
 function getSong(id) {
   return new Promise((resolve, reject) => {
     request.get('http://music.163.com/api/song/detail')
-      .query({ id, ids: `[${id}]`, csrf_token: '' })
+      .query({ id, ids: `[${id}]` })
       .set(getHeader)
       .retry()
       .end((err, res) => {
@@ -34,7 +34,7 @@ function getSong(id) {
 // 获取歌曲评论
 function getSongComment({ _id, name, comment }) {
   return new Promise((resolve, reject) => {
-    request.post(`http://music.163.com/weapi/v1/resource/comments/${comment.id}/?csrf_token=`)
+    request.post(`http://music.163.com/weapi/v1/resource/comments/${comment.id}/`)
       .set(postHeader)
       .send(authentication)
       .retry()
@@ -66,7 +66,8 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
         count: hotComment.likedCount,       // 最火热评点赞总数
         nickname: hotComment.user.nickname, // 最火热评作者
         content: hotComment.content         // 最火热评内容
-      }
+      },
+      updateTime: new Date().getTime()
     };
     // 保存歌曲
     dbSongs.update({ _id: song._id }, { $set: { comment: songComment } }, function(err, res) {
@@ -80,25 +81,33 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
 // 运行爬取歌曲评论
 function runSongComment(...params) {
   const [record, recordNext, dbSongs, cb] = params;
-  getSongComment(record).then(comment => {
-
-    // 保存歌曲评论
-    saveSongComment(record, comment, dbSongs).then(() => {
-      typeof cb === 'function' && cb();
+  dbSongs.find({ _id: record._id }).toArray((err, docs) => {
+    if (docs[0].comment.updateTime && new Date().getTime() - docs[0].comment.updateTime < 24*60*60*1000) {
+      // 如果评论有updateTime，并且updateTime距今相差小于24小时，则跳过此歌曲评论的爬取
+      typeof cb === 'function' && cb('skip');
       recordNext();
-    });
+      return;
+    }
+    getSongComment(record).then(comment => {
 
-  }).catch(error => {
-    catchPromiseError(error);
-    if (error.err) {
-      // 请求失败，跳过或重试
-      rl.question('🚩是否跳过? [ yes:跳过 / no:重试 ]\t', (answer = 'no') => {
-        if (answer === 'yes') { recordNext(); } else {
-          runSongComment(...params);
-        }
-        rl.close();
+      // 保存歌曲评论
+      saveSongComment(record, comment, dbSongs).then(() => {
+        typeof cb === 'function' && cb();
+        recordNext();
       });
-    } else { recordNext(); }
+
+    }).catch(error => {
+      catchPromiseError(error);
+      if (error.err) {
+        // 请求失败，跳过或重试
+        rl.question('🚩是否跳过? [ yes:跳过 / no:重试 (默认) ]\t', (answer = 'no') => {
+          if (answer === 'yes') { recordNext(); } else {
+            runSongComment(...params);
+          }
+          rl.close();
+        });
+      } else { recordNext(); }
+    });
   });
 }
 
@@ -141,34 +150,27 @@ function run(db) {
 
   // 每读取10个数据执行一次toDo
   function toDo(records, callback) {
-    let millisec = 0;
-    if (!(songIndex+1)%3000) {
-      // 每爬取3000个数据，休息3分钟
-      millisec = 180 * 1000;
-      console.log('🕓休息3分钟', new Date());
-    }
-    setTimeout(() => {
-      // 异步并发获取歌曲评论
-      async.mapLimit(records, 2, (record, recordNext) => {
+    // 异步并发获取歌曲评论
+    async.mapLimit(records, 2, (record, recordNext) => {
 
-        // 爬取歌曲评论开始时间
-        const songStart = new Date().getTime();
-        runSongComment(record, recordNext, dbSongs, () => {
-          // 爬取歌曲评论结束时间
-          const songEnd = new Date().getTime();
-          console.info(`💿歌曲 <${record._id}:${record.name}> 评论抓取完毕！`);
-          console.info(`🕓本歌曲评论耗时: ${(songEnd-songStart)/1000}s`,
-            `总耗时: ${(songEnd-start.getTime())/1000}s`);
-          console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲]\n`);
-          songIndex++;
-        });
-
-      }, (err, res) => {
-        if (err) { console.error(err); } else {
-          process.nextTick(callback);   // next
-        }
+      // 爬取歌曲评论开始时间
+      const songStart = new Date().getTime();
+      runSongComment(record, recordNext, dbSongs, (skip = false) => {
+        // 爬取歌曲评论结束时间
+        const songEnd = new Date().getTime();
+        if (skip) { console.info(`💿歌曲 <${record._id}:${record.name}> 评论最近已完成抓取，此次将跳过！`); }
+        else { console.info(`💿歌曲 <${record._id}:${record.name}> 评论抓取完毕！`); }
+        console.info(`🕓本歌曲评论耗时: ${(songEnd-songStart)/1000}s`,
+          `总耗时: ${(songEnd-start.getTime())/1000}s`);
+        console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲]\n`);
+        songIndex++;
       });
-    }, millisec);
+
+    }, (err, res) => {
+      if (err) { console.error(err); } else {
+        process.nextTick(callback);   // next
+      }
+    });
   }
 
 }

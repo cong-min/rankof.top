@@ -10,22 +10,40 @@ const { getHeader, postHeader, authentication } = require('./config.js');
 // 获取歌手列表
 function getArtistList(page) {
   return new Promise((resolve, reject) => {
-    request.post('http://music.163.com/weapi/artist/top?csrf_token=')
+    request.post('http://music.163.com/weapi/artist/top')
       .set(postHeader)
       .send(Object.assign({}, authentication,
-        { limit: 35, offset: 35*page, csrf_token: '' }))
+        { limit: 35, offset: 35*page }))
       .retry()
       .end((err, res) => {
         if (err) { reject({ hint: `获取第 <${page+1}> 页歌手列表失败`, err }); return; }
         if (res.text) {
-          const { artists } = JSON.parse(res.text);
+          const { artists, more } = JSON.parse(res.text);
           if (!artists.length) { reject({ hint: `无第 <${page+1}> 页歌单列表` }); return; }
-          resolve(artists);
+          resolve(artists, more);
         }
       });
   });
 }
-getArtistList(0).then(artists => {
+
+// 获取歌手详情
+function getArtist(id) {
+  return new Promise((resolve, reject) => {
+    request.get(`http://music.163.com/api/artist/${id}`)
+      .set(getHeader)
+      .retry()
+      .end((err, res) => {
+        if (err) { reject({ hint: `获取第 <${page+1}> 页歌手列表失败`, err }); return; }
+        if (res.text) {
+          const { artists, more } = JSON.parse(res.text);
+          if (!artists.length) { reject({ hint: `无第 <${page+1}> 页歌单列表` }); return; }
+          resolve(artists, more);
+        }
+      });
+  });
+}
+
+getArtistList(0).then((artists, more) => {
   console.log(artists);
 });
 // 获取歌单信息
