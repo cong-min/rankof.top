@@ -5,11 +5,6 @@ const request = require('superagent');
 const cheerio = require('cheerio');
 const async = require('async');
 const db = require('../../server/db.js');
-const readline = require('readline');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 
 const { getHeader, postHeader, authentication } = require('./config.js');
 
@@ -42,7 +37,7 @@ function getSongComment({ _id, name, comment }) {
         if (err) { reject({ hint: `🔥获取 <${_id}:${name}> 评论失败`, err }); return; }
         if (res.text) {
           const { total, hotComments } = JSON.parse(res.text);
-          if (!total) { reject({ hint: `💿歌曲 <${_id}:${name}> 无评论` }); return; }
+          if (!total) { reject({ hint: `💿歌曲 <${_id}:${name}> 无评论\n` }); return; }
           resolve({ commentId: comment.id, total, hotComment: hotComments[0] });
         }
       });
@@ -98,15 +93,10 @@ function runSongComment(...params) {
 
     }).catch(error => {
       catchPromiseError(error);
-      if (error.err) {
-        // 请求失败，跳过或重试
-        rl.question('🚩是否跳过? [ yes:跳过 / no:重试 (默认) ]\t', (answer = 'no') => {
-          if (answer === 'yes') { recordNext(); } else {
-            runSongComment(...params);
-          }
-          rl.close();
-        });
-      } else { recordNext(); }
+      if (!error.err) {
+        typeof cb === 'function' && cb();
+        recordNext();
+      }
     });
   });
 }
@@ -155,13 +145,16 @@ function run(db) {
 
       // 爬取歌曲评论开始时间
       const songStart = new Date().getTime();
-      runSongComment(record, recordNext, dbSongs, (skip = false) => {
+      runSongComment(record, recordNext, dbSongs, (status) => {
         // 爬取歌曲评论结束时间
         const songEnd = new Date().getTime();
-        if (skip) { console.info(`💿歌曲 <${record._id}:${record.name}> 评论最近已完成抓取，此次将跳过！`); }
-        else { console.info(`💿歌曲 <${record._id}:${record.name}> 评论抓取完毕！`); }
-        console.info(`🕓本歌曲评论耗时: ${(songEnd-songStart)/1000}s`,
-          `总耗时: ${(songEnd-start.getTime())/1000}s`);
+        if (status === 'skip') {
+          console.info(`💿歌曲 <${record._id}:${record.name}> 评论最近已完成抓取，此次将跳过！`);
+        } else {
+          console.info(`💿歌曲 <${record._id}:${record.name}> 评论抓取完毕！`);
+          console.info(`🕓本歌曲评论耗时: ${(songEnd-songStart)/1000}s`,
+            `总耗时: ${(songEnd-start.getTime())/1000}s`);
+        }
         console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲]\n`);
         songIndex++;
       });

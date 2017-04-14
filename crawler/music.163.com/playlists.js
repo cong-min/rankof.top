@@ -5,11 +5,6 @@ const request = require('superagent');
 const cheerio = require('cheerio');
 const async = require('async');
 const db = require('../../server/db.js');
-const readline = require('readline');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 
 const { getHeader, postHeader, authentication } = require('./config.js');
 
@@ -120,7 +115,9 @@ function runPlaylistList(...params) {
       runPlaylist(playlist, playlistNext, dbPlaylists, dbSongs, (playlistDetail) => {
         // 爬取单个歌单结束时间
         const playlistEnd = new Date().getTime();
-        console.info(`📑歌单 <${playlistDetail.id}:${playlistDetail.name}> 抓取完毕！`);
+        if (playlistDetail) {   // 有此歌单
+          console.info(`📑歌单 <${playlistDetail.id}:${playlistDetail.name}> 抓取完毕！`);
+        }
         console.info(`🕓本歌单耗时: ${(playlistEnd-playlistStart)/1000}s`,
           `总耗时: ${(playlistEnd-start.getTime())/1000}s`);
         console.info(`⏳进度: [${page+1}/${endPage+1}页]`,
@@ -162,16 +159,10 @@ function runPlaylist(...params) {
 
   }).catch(error => {
     catchPromiseError(error);
-    if (error.err) {
-      // 请求失败，跳过或重试
-      rl.question('🚩是否跳过? [ yes:跳过 / no:重试 (默认) ]\t', (answer = 'no') => {
-        consoe.log(answer);
-        if (answer === 'yes') { playlistNext(); } else {
-          runPlaylist(...params);
-        }
-        rl.close();
-      });
-    } else { playlistNext(); }
+    if (!error.err) {
+      typeof cb === 'function' && cb();
+      playlistNext();
+    }
   });
 }
 
