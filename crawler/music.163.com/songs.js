@@ -37,7 +37,7 @@ function getSongComment({ _id, name, comment }) {
         if (err) { reject({ hint: `🔥获取 <${_id}:${name}> 评论失败`, err }); return; }
         if (res.text) {
           const { total, hotComments } = JSON.parse(res.text);
-          if (!total) { reject({ hint: `💿歌曲 <${_id}:${name}> 无评论\n` }); return; }
+          if (!total) { reject({ hint: `💿歌曲 <${_id}:${name}> 无评论` }); return; }
           resolve({ commentId: comment.id, total, hotComment: hotComments[0] });
         }
       });

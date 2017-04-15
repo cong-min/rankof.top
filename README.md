@@ -1,5 +1,7 @@
-# hotspoter
+# rankof.top
 
+> **毕业设计**
+> 
 > 网络社区热点爬取与分析系统
 
 ## Build Setup
