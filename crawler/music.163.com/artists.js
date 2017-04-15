@@ -7,185 +7,178 @@ const async = require('async');
 const db = require('../../server/db.js');
 const { getHeader, postHeader, authentication } = require('./config.js');
 
-// 获取歌手列表
-function getArtistList(page) {
-  return new Promise((resolve, reject) => {
-    request.post('http://music.163.com/weapi/artist/top')
-      .set(postHeader)
-      .send(Object.assign({}, authentication,
-        { limit: 35, offset: 35*page }))
-      .retry()
-      .end((err, res) => {
-        if (err) { reject({ hint: `获取第 <${page+1}> 页歌手列表失败`, err }); return; }
-        if (res.text) {
-          const { artists, more } = JSON.parse(res.text);
-          if (!artists.length) { reject({ hint: `无第 <${page+1}> 页歌单列表` }); return; }
-          resolve(artists, more);
-        }
-      });
-  });
-}
-
-// 获取歌手详情
+// 获取歌手具体信息&热门歌曲
 function getArtist(id) {
   return new Promise((resolve, reject) => {
     request.get(`http://music.163.com/api/artist/${id}`)
       .set(getHeader)
       .retry()
       .end((err, res) => {
-        if (err) { reject({ hint: `获取第 <${page+1}> 页歌手列表失败`, err }); return; }
+        if (err) { reject({ hint: `获取歌手 <${id}> 信息失败`, err }); return; }
         if (res.text) {
-          const { artists, more } = JSON.parse(res.text);
-          if (!artists.length) { reject({ hint: `无第 <${page+1}> 页歌单列表` }); return; }
-          resolve(artists, more);
+          const { artist, hotSongs } = JSON.parse(res.text);
+          resolve({ artist, hotSongs });
         }
       });
   });
 }
 
-getArtistList(0).then((artists, more) => {
-  console.log(artists);
+// 捕捉错误
+function catchPromiseError(error) {
+  if (!error.hint) { console.error(error); }
+  else if (!error.err) { console.error(error.hint); }
+  else { console.error(error.hint, error.err.status || error.err); }
+}
+
+// 保存歌手信息
+function saveArtist(artist, dbArtists) {
+  return new Promise((resolve, reject) => {
+    const iArtist = {
+      _id: artist.id,                 // 歌手id
+      name: artist.name,              // 歌手名
+      albumSize: artist.albumSize,    // 歌手专辑数
+      musicSize: artist.musicSize,    // 歌手音乐数
+      mvSize: artist.mvSize           // 歌手MV数
+    };
+    // 保存歌手
+    dbArtists.update({ _id: iArtist._id }, iArtist, function(err, res) {
+      if (err) { console.error(`🔥歌手 <${iArtist._id}:${iArtist.name}> 录入数据库失败`, err); }
+      else { console.info(`🎤歌手 <${iArtist._id}:${iArtist.name}> 录入成功`); }
+      resolve();
+    });
+  });
+}
+
+// 保存歌手热门歌曲
+function saveSong(hotSong, dbSongs) {
+  return new Promise((resolve, reject) => {
+    const song = {
+      _id: hotSong.id,                      // 歌曲id
+      name: hotSong.name,                   // 歌曲名
+      artist: {
+        id: hotSong.artists[0].id,          // 歌手id
+        name: hotSong.artists[0].name       // 歌手名
+      },
+      comment: {
+        id: `R_SO_4_${hotSong.id}`          // 评论区id
+      }
+    };
+    // 保存歌曲
+    dbSongs.save(song, function(err, res) {
+      if (err) { console.error(`\t🔥歌曲 <${song._id}:${song.name}> 录入数据库失败`, err); }
+      else { console.info(`\t💿歌曲 <${song._id}:${song.name}> 录入成功`); }
+      resolve();
+    });
+  });
+}
+
+// 运行爬取歌曲评论
+function runArtist(...params) {
+  const [record, recordNext, dbArtists, dbSongs, cb] = params;
+  dbArtists.find({ _id: record._id }).toArray((err, docs) => {
+    if (docs[0].updateTime && new Date().getTime() - docs[0].updateTime < 24*60*60*1000) {
+      // 如果歌手有updateTime，并且updateTime距今相差小于24小时，则跳过此歌手的爬取
+      typeof cb === 'function' && cb('skip');
+      recordNext();
+      return;
+    }
+    getArtist(record._id).then(({ artist, hotSongs }) => {
+
+      // 保存歌手信息
+      saveArtist(artist, dbArtists).then(() => {
+
+        async.mapLimit(hotSongs, 5, (hotSong, songNext) => {
+          // 保存歌手热门歌曲
+          saveSong(hotSong, dbSongs).then(songNext);
+        }, (err, res) => {
+          if (err) { console.error(err); } else {
+            typeof cb === 'function' && cb();
+            recordNext();
+          }
+        });
+      });
+
+    }).catch(error => {
+      catchPromiseError(error);
+      if (!error.err) {
+        typeof cb === 'function' && cb();
+        recordNext();
+      }
+    });
+  });
+}
+
+// 运行爬虫
+function run(db) {
+  const dbArtists = db.collection('music.163.com:artists');
+  const dbSongs = db.collection('music.163.com:songs');
+  // 爬取所有歌手信息开始时间
+  const start = new Date();
+  let artistIndex = 0;  // 歌手所位于数据库中的序号
+  let artistCount;
+  dbArtists.count().then(count => {
+    artistCount = count;
+  });
+
+  // 利用stream读取大量数据
+  const stream = dbArtists.find().stream();
+  let cache = [];
+  stream.on('data', item => {
+    cache.push(item);
+    if (cache.length === 10) {
+      stream.pause();
+      process.nextTick(() => {
+        toDo(cache, () => {
+          cache = [];
+          stream.resume();  // fetch next
+        });
+      });
+    }
+  });
+  stream.on('end', () => {
+    db.close();
+    // 爬取所有歌单结束时间
+    const end = new Date();
+    console.info(`\n📑🎤所有歌手信息全部抓取完毕！`);
+    console.info(`开始时间: ${start}`);
+    console.info(`结束时间: ${end}`);
+    console.info(`🕓耗时: ${(end.getTime()-start.getTime())/1000}s\n`);
+  });
+  stream.on('close', () => { console.log('query closed'); });
+
+  // 每读取10个数据执行一次toDo
+  function toDo(records, callback) {
+    // 异步并发获取歌手信息
+    async.mapLimit(records, 1, (record, recordNext) => {
+
+      // 爬取歌手信息开始时间
+      const artistStart = new Date().getTime();
+      runArtist(record, recordNext, dbArtists, dbSongs, (status) => {
+        // 爬取歌手信息结束时间
+        const artistEnd = new Date().getTime();
+        if (status === 'skip') {
+          console.info(`🎤歌手 <${record._id}:${record.name}> 信息最近已完成抓取，此次将跳过！`);
+        } else {
+          console.info(`🎤歌手 <${record._id}:${record.name}> 信息抓取完毕！`);
+          console.info(`🕓该歌手信息耗时: ${(artistEnd-artistStart)/1000}s`,
+            `总耗时: ${(artistEnd-start.getTime())/1000}s`);
+        }
+        console.info(`⏳进度: [${artistIndex+1}/${artistCount}歌手]\n`);
+        artistIndex++;
+      });
+
+    }, (err, res) => {
+      if (err) { console.error(err); } else {
+        process.nextTick(callback);   // next
+      }
+    });
+  }
+
+}
+
+// 打开数据库，开启运行
+db.open((err, db) => {
+  if (err) { console.error(err); } else {
+    run(db);
+  }
 });
-// 获取歌单信息
-// function getPlaylist(id) {
-//   return new Promise((resolve, reject) => {
-//     request.get('http://music.163.com/api/playlist/detail')
-//       .query({ id, csrf_token: '' })
-//       .set(getHeader)
-//       .end((err, res) => {
-//         if (err) { reject({ hint: `🔥获取 <${id}> 歌单信息失败`, err }); return; }
-//         if (res.text) {
-//           const { result } = JSON.parse(res.text);
-//           if (!result) { reject({ hint: `📑无歌单<${id}>` }); return; }
-//           resolve(result);
-//         }
-//       });
-//   });
-// }
-//
-// // 捕捉错误
-// function catchPromiseError(error) {
-//   if (!error.hint) { console.error(error); }
-//   else if (!error.err) { console.error(error.hint); }
-//   else { console.error(error.hint, error.err.status || error.err); }
-// }
-//
-// // 保存歌单
-// function savePlaylist({ id, name, commentCount, shareCount, playCount, subscribedCount, tracks }, dbPlaylists) {
-//   return new Promise((resolve, reject) => {
-//     const playlist = {
-//       _id: id,                              // 歌单id
-//       name,                                 // 歌单名
-//       commentCount,                         // 歌单评论数
-//       shareCount,                           // 歌单分享量
-//       playCount,                            // 歌单播放量
-//       subscribedCount                       // 歌单收藏量
-//     };
-//     // 保存歌单
-//     dbPlaylists.save(playlist, function(err, res) {
-//       if (err) { console.error(`🔥歌单 <${id}:${playlist.name}> 录入数据库失败`, err); }
-//       else { console.info(`📑歌单 <${id}:${playlist.name}> 录入成功`); }
-//       console.info(`\t📑本歌单共有 [${tracks.length}] 首歌曲`);
-//       resolve();
-//     });
-//   });
-// }
-//
-// // 保存歌单中的歌曲
-// function saveSong(tracks, dbSongs) {
-//   return new Promise((resolve, reject) => {
-//     let completeCount = 0;
-//     tracks.forEach((track, index) => {
-//       const song = {
-//         _id: track.id,                      // 歌曲id
-//         name: track.name,                   // 歌曲名
-//         artist: {
-//           id: track.artists[0].id,          // 歌手id
-//           name: track.artists[0].name       // 歌手名
-//         },
-//         comment: {
-//           id: track.commentThreadId         // 评论区id
-//         }
-//       };
-//       // 保存歌曲
-//       dbSongs.save(song, function(err, res) {
-//         if (err) { console.error(`\t${index+1}. 🔥歌曲 <${song._id}:${song.name}> 录入数据库失败`, err); }
-//         else { console.info(`\t${index+1}. 💿歌曲 <${song._id}:${song.name}> 录入成功`); }
-//         completeCount++;
-//         if (completeCount === tracks.length) { resolve(); }
-//       });
-//     });
-//   });
-// }
-//
-// // 运行爬虫
-// function run(db) {
-//   const dbPlaylists = db.collection('music.163.com:playlists');
-//   const dbSongs = db.collection('music.163.com:songs');
-//   const [beginPage, endPage] = [0, 43];   // 开始页数, 结束页数
-//   const pages = new Array(endPage-beginPage+1).fill(beginPage).map((e, i) => i + e);
-//   // 异步并发获取歌单列表
-//   // 爬取所有歌单开始时间
-//   const start = new Date();
-//   async.mapLimit(pages, 1, (page, pageNext) => {
-//     getPlaylists(page).then(playlists => {
-//
-//       // 异步并发获取歌单详情
-//       // 爬取本页歌单开始时间
-//       const pageStart = new Date().getTime();
-//       let playlistIndex = 0;  // 以下歌单所位于本页的序号
-//       async.mapLimit(playlists, 1, (playlist, playlistNext) => {
-//         // 爬取单个歌单开始时间
-//         const playlistStart = new Date().getTime();
-//         getPlaylist(playlist.id).then(playlistDetail => {
-//
-//           // 保存歌单
-//           savePlaylist(playlistDetail, dbPlaylists).then(() => {
-//             // 处理数据并保存歌单内的歌曲
-//             saveSong(playlistDetail.tracks, dbSongs).then(() => {
-//               // 爬取单个歌单结束时间
-//               const playlistEnd = new Date().getTime();
-//               console.info(`📑歌单 <${playlistDetail.id}:${playlistDetail.name}> 抓取完毕！`);
-//               console.info(`🕓本歌单耗时: ${(playlistEnd-playlistStart)/1000}s`,
-//                 `总耗时: ${(playlistEnd-start.getTime())/1000}s`);
-//               console.info(`⏳进度: [${page+1}/${endPage+1}页]`,
-//                 `[${playlistIndex+1}/${playlists.length}歌单]\n`);
-//               playlistIndex++;
-//               playlistNext();
-//             });
-//           });
-//
-//         }).catch(catchPromiseError);
-//       }, (err, res) => {
-//         if (err) { console.error(err); } else {
-//           // 爬取本页歌单结束时间
-//           const pageEnd = new Date().getTime();
-//           console.info(`📑第 [${page+1}/${endPage+1}] 页歌单抓取完毕！`);
-//           console.info(`🕓本页歌单耗时: ${(pageEnd-pageStart)/1000}s`,
-//             `总耗时: ${(pageEnd-start.getTime())/1000}s`);
-//         }
-//         pageNext();
-//       });
-//
-//     }).catch(err => {
-//       catchPromiseError(err);
-//       pageNext();
-//     });
-//   }, (err, res) => {
-//     if (err) { console.error(err); } else {
-//       db.close();   // 关闭数据库连接
-//       // 爬取所有歌单结束时间
-//       const end = new Date();
-//       console.info(`\n📑💿所有歌单及歌曲全部抓取完毕！`);
-//       console.info(`开始时间: ${start}`);
-//       console.info(`结束时间: ${end}`);
-//       console.info(`🕓耗时: ${(end.getTime()-start.getTime())/1000}s\n`);
-//     }
-//   });
-// }
-//
-// db.open((err, db) => {
-//   if (err) { console.error(err); } else {
-//     run(db);
-//   }
-// });

@@ -109,7 +109,7 @@ function run(db) {
   let songIndex = 0;  // 歌曲所位于数据库中的序号
   let songCount;
   dbSongs.count().then(count => {
-    songCount = count
+    songCount = count;
   });
 
   // 利用stream读取大量数据
@@ -141,7 +141,7 @@ function run(db) {
   // 每读取10个数据执行一次toDo
   function toDo(records, callback) {
     // 异步并发获取歌曲评论
-    async.mapLimit(records, 2, (record, recordNext) => {
+    async.mapLimit(records, 10, (record, recordNext) => {
 
       // 爬取歌曲评论开始时间
       const songStart = new Date().getTime();
