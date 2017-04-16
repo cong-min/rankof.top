@@ -39,7 +39,8 @@ function saveArtist(artist, dbArtists) {
       name: artist.name,              // 歌手名
       albumSize: artist.albumSize,    // 歌手专辑数
       musicSize: artist.musicSize,    // 歌手音乐数
-      mvSize: artist.mvSize           // 歌手MV数
+      mvSize: artist.mvSize,          // 歌手MV数
+      updateTime: new Date().getTime()    // 评论更新时间
     };
     // 保存歌手
     dbArtists.update({ _id: iArtist._id }, iArtist, function(err, res) {

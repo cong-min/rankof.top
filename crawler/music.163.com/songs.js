@@ -62,7 +62,7 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
         nickname: hotComment.user.nickname, // 最火热评作者
         content: hotComment.content         // 最火热评内容
       },
-      updateTime: new Date().getTime()
+      updateTime: new Date().getTime()      // 评论更新时间
     };
     // 保存歌曲
     dbSongs.update({ _id: song._id }, { $set: { comment: songComment } }, function(err, res) {
