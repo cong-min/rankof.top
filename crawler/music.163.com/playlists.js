@@ -16,7 +16,7 @@ function getPlaylistList(page) {
       .set(getHeader)
       .retry()
       .end((err, res) => {
-        if (err) { reject({ hint: `获取第 <${page+1}> 页歌单列表失败`, err }); return; }
+        if (err) { reject({ hint: `🔥获取第 <${page+1}> 页歌单列表失败`, err }); return; }
         if (res.text) {
           const { playlists } = JSON.parse(res.text);
           if (!playlists.length) { reject({ hint: `无第 <${page+1}> 页歌单列表` }); return; }

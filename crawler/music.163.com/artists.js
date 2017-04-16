@@ -14,9 +14,10 @@ function getArtist(id) {
       .set(getHeader)
       .retry()
       .end((err, res) => {
-        if (err) { reject({ hint: `获取歌手 <${id}> 信息失败`, err }); return; }
+        if (err) { reject({ hint: `🔥获取歌手 <${id}> 信息失败`, err }); return; }
         if (res.text) {
           const { artist, hotSongs } = JSON.parse(res.text);
+          if (!artist) { reject({ hint: `🔥无歌手 <${id}> 信息` }); return; }
           resolve({ artist, hotSongs });
         }
       });
@@ -89,7 +90,7 @@ function runArtist(...params) {
 
         async.mapLimit(hotSongs, 5, (hotSong, songNext) => {
           // 保存歌手热门歌曲
-          saveSong(hotSong, dbSongs).then(songNext);
+          saveSong(hotSong, dbSongs).then(songNext)
         }, (err, res) => {
           if (err) { console.error(err); } else {
             typeof cb === 'function' && cb();
@@ -149,7 +150,7 @@ function run(db) {
   // 每读取10个数据执行一次toDo
   function toDo(records, callback) {
     // 异步并发获取歌手信息
-    async.mapLimit(records, 1, (record, recordNext) => {
+    async.mapLimit(records, 5, (record, recordNext) => {
 
       // 爬取歌手信息开始时间
       const artistStart = new Date().getTime();
