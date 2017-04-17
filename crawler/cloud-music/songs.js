@@ -107,14 +107,13 @@ function run(db) {
     ]
   });
   let songTotalCount, songCount;   // 总歌曲数, 待爬歌曲数
-  let songIndex;    // 歌曲所位于数据库中的序号
   dbSongs.count().then(count => {
     songTotalCount = count;
-    data.count().then(count => {
-      songCount = count;
-      songIndex = songTotalCount - songCount;
-    });
   });
+  data.count().then(count => {
+    songCount = count;
+  });
+  let songIndex = 0;    // 歌曲所位于数据库中的序号
 
   // 利用stream读取大量数据
   const stream = data.stream();
@@ -159,7 +158,7 @@ function run(db) {
           console.info(`🕓本歌曲评论耗时: ${(songEnd-songStart)/1000}s`,
             `总耗时: ${(songEnd-start.getTime())/1000}s`);
         }
-        console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲]\n`);
+        console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲] - [${songIndex+1+(songTotalCount-songCount)}/${songTotalCount}歌曲]\n`);
         songIndex++;
         recordNext();
       });
