@@ -165,11 +165,11 @@ function run(db) {
 
     }, (err, res) => {
       if (err) { console.error(err); } else {
-        // 每读取50个数据暂停3秒
-        console.info(`⏳每读取50个数据暂停2秒\n`);
+        // 每读取50个数据暂停1秒
+        console.info(`⏳每读取50个数据暂停1秒\n`);
         setTimeout(() => {
           process.nextTick(callback);   // next
-        }, 2000);
+        }, 1000);
       }
     });
   }
