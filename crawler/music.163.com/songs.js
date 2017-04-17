@@ -159,11 +159,11 @@ function run(db) {
 
     }, (err, res) => {
       if (err) { console.error(err); } else {
-        // 每读取50个数据暂停3秒
-        console.info(`⏳每读取50个数据暂停3秒`);
+        // 每读取50个数据暂停1秒
+        console.info(`⏳每读取50个数据暂停1秒`);
         setTimeout(() => {
           process.nextTick(callback);   // next
-        }, 3000);
+        }, 1000);
       }
     });
   }
