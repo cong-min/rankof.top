@@ -76,12 +76,11 @@ function saveSong(hotSong, dbSongs) {
 
 // 运行爬取歌曲评论
 function runArtist(...params) {
-  const [record, recordNext, dbArtists, dbSongs, cb] = params;
+  const [record, dbArtists, dbSongs, cb] = params;
   dbArtists.find({ _id: record._id }).toArray((err, docs) => {
     if (docs[0].updateTime && new Date().getTime() - docs[0].updateTime < 24*60*60*1000) {
       // 如果歌手有updateTime，并且updateTime距今相差小于24小时，则跳过此歌手的爬取
       typeof cb === 'function' && cb('skip');
-      recordNext();
       return;
     }
     getArtist(record._id).then(({ artist, hotSongs }) => {
@@ -95,7 +94,6 @@ function runArtist(...params) {
         }, (err, res) => {
           if (err) { console.error(err); } else {
             typeof cb === 'function' && cb();
-            recordNext();
           }
         });
       });
@@ -104,7 +102,6 @@ function runArtist(...params) {
       catchPromiseError(error);
       if (!error.err) {
         typeof cb === 'function' && cb();
-        recordNext();
       }
     });
   });
@@ -155,7 +152,7 @@ function run(db) {
 
       // 爬取歌手信息开始时间
       const artistStart = new Date().getTime();
-      runArtist(record, recordNext, dbArtists, dbSongs, (status) => {
+      runArtist(record, dbArtists, dbSongs, (status) => {
         // 爬取歌手信息结束时间
         const artistEnd = new Date().getTime();
         if (status === 'skip') {
@@ -167,6 +164,7 @@ function run(db) {
         }
         console.info(`⏳进度: [${artistIndex+1}/${artistCount}歌手]\n`);
         artistIndex++;
+        recordNext();
       });
 
     }, (err, res) => {

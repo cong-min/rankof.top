@@ -75,12 +75,11 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
 
 // 运行爬取歌曲评论
 function runSongComment(...params) {
-  const [record, recordNext, dbSongs, cb] = params;
+  const [record, dbSongs, cb] = params;
   dbSongs.find({ _id: record._id }).toArray((err, docs) => {
     if (docs[0].comment.updateTime && new Date().getTime() - docs[0].comment.updateTime < 24*60*60*1000) {
       // 如果评论有updateTime，并且updateTime距今相差小于24小时，则跳过此歌曲评论的爬取
       typeof cb === 'function' && cb('skip');
-      recordNext();
       return;
     }
     getSongComment(record).then(comment => {
@@ -88,14 +87,12 @@ function runSongComment(...params) {
       // 保存歌曲评论
       saveSongComment(record, comment, dbSongs).then(() => {
         typeof cb === 'function' && cb();
-        recordNext();
       });
 
     }).catch(error => {
       catchPromiseError(error);
       if (!error.err) {
         typeof cb === 'function' && cb();
-        recordNext();
       }
     });
   });
@@ -117,7 +114,7 @@ function run(db) {
   let cache = [];
   stream.on('data', item => {
     cache.push(item);
-    if (cache.length === 10) {
+    if (cache.length === 50) {
       stream.pause();
       process.nextTick(() => {
         toDo(cache, () => {
@@ -138,14 +135,14 @@ function run(db) {
   });
   stream.on('close', () => { console.log('query closed'); });
 
-  // 每读取10个数据执行一次toDo
+  // 每读取50个数据执行一次toDo
   function toDo(records, callback) {
     // 异步并发获取歌曲评论
     async.mapLimit(records, 10, (record, recordNext) => {
 
       // 爬取歌曲评论开始时间
       const songStart = new Date().getTime();
-      runSongComment(record, recordNext, dbSongs, (status) => {
+      runSongComment(record, dbSongs, (status) => {
         // 爬取歌曲评论结束时间
         const songEnd = new Date().getTime();
         if (status === 'skip') {
@@ -157,11 +154,16 @@ function run(db) {
         }
         console.info(`⏳进度: [${songIndex+1}/${songCount}歌曲]\n`);
         songIndex++;
+        recordNext();
       });
 
     }, (err, res) => {
       if (err) { console.error(err); } else {
-        process.nextTick(callback);   // next
+        // 每读取50个数据暂停3秒
+        console.info(`⏳每读取50个数据暂停3秒`);
+        setTimeout(() => {
+          process.nextTick(callback);   // next
+        }, 3000);
       }
     });
   }
