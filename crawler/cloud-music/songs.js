@@ -107,15 +107,15 @@ function run(db) {
       { 'comment.updateTime': null }
     ]
   });
-  let songTotalCount;   // 总歌曲数
+  let songTotalCount, songCount;   // 总歌曲数, 待爬歌曲数
+  let songIndex;    // 歌曲所位于数据库中的序号
   dbSongs.count().then(count => {
     songTotalCount = count;
+    data.count().then(count => {
+      songCount = count;
+      songIndex = songTotalCount - songCount;
+    });
   });
-  let songCount;        // 待爬歌曲数
-  data.count().then(count => {
-    songCount = count;
-  });
-  let songIndex = songTotalCount - songCount;    // 歌曲所位于数据库中的序号
 
   // 利用stream读取大量数据
   const stream = data.stream();
