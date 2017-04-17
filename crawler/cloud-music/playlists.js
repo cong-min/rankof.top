@@ -1,4 +1,4 @@
-/* crawler - music.163.com - playlists
+/* crawler - cloud-music - playlists
  * 获取所有的热门歌单及其内歌曲
  * @ Cong Min */
 const request = require('superagent');
@@ -194,9 +194,9 @@ function runPlaylist(...params) {
 
 // 运行爬虫
 function run(db) {
-  const dbPlaylists = db.collection('music.163.com:playlists');
-  const dbSongs = db.collection('music.163.com:songs');
-  const dbArtists = db.collection('music.163.com:artists');
+  const dbPlaylists = db.collection('cloud-music:playlists');
+  const dbSongs = db.collection('cloud-music:songs');
+  const dbArtists = db.collection('cloud-music:artists');
   const [beginPage, endPage] = [0, 43];   // 歌单分页开始页数, 结束页数
   const pages = new Array(endPage-beginPage+1).fill(beginPage).map((e, i) => i + e);
   // 爬取所有歌单开始时间

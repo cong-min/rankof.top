@@ -1,4 +1,4 @@
-/* crawler - music.163.com - songs
+/* crawler - cloud-music - songs
  * 获取所有的歌曲及其评论
  * @ Cong Min */
 const request = require('superagent');
@@ -76,41 +76,49 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
 // 运行爬取歌曲评论
 function runSongComment(...params) {
   const [record, dbSongs, cb] = params;
-  dbSongs.find({ _id: record._id }).toArray((err, docs) => {
-    if (docs[0].comment.updateTime && new Date().getTime() - docs[0].comment.updateTime < 24*60*60*1000) {
-      // 如果评论有updateTime，并且updateTime距今相差小于24小时，则跳过此歌曲评论的爬取
-      typeof cb === 'function' && cb('skip');
-      return;
-    }
-    getSongComment(record).then(comment => {
+  if (record.comment.updateTime && new Date().getTime() - record.comment.updateTime < 24*60*60*1000) {
+    // 如果评论有updateTime，并且updateTime距今相差小于24小时，则跳过此歌曲评论的爬取
+    typeof cb === 'function' && cb('skip');
+    return;
+  }
+  getSongComment(record).then(comment => {
 
-      // 保存歌曲评论
-      saveSongComment(record, comment, dbSongs).then(() => {
-        typeof cb === 'function' && cb();
-      });
-
-    }).catch(error => {
-      catchPromiseError(error);
-      if (!error.err) {
-        typeof cb === 'function' && cb();
-      }
+    // 保存歌曲评论
+    saveSongComment(record, comment, dbSongs).then(() => {
+      typeof cb === 'function' && cb();
     });
+
+  }).catch(error => {
+    catchPromiseError(error);
+    if (!error.err) {
+      typeof cb === 'function' && cb();
+    }
   });
 }
 
 // 运行爬虫
 function run(db) {
-  const dbSongs = db.collection('music.163.com:songs');
+  const dbSongs = db.collection('cloud-music:songs');
   // 爬取所有歌曲评论开始时间
   const start = new Date();
-  let songIndex = 0;  // 歌曲所位于数据库中的序号
-  let songCount;
+  const data = dbSongs.find({
+    $or:[
+      { 'comment.updateTime': { $lte: new Date().getTime() - 24*60*60*1000 } },
+      { 'comment.updateTime': null }
+    ]
+  });
+  let songTotalCount;   // 总歌曲数
   dbSongs.count().then(count => {
+    songTotalCount = count;
+  });
+  let songCount;        // 待爬歌曲数
+  data.count().then(count => {
     songCount = count;
   });
+  let songIndex = songTotalCount - songCount;    // 歌曲所位于数据库中的序号
 
   // 利用stream读取大量数据
-  const stream = dbSongs.find().stream();
+  const stream = data.stream();
   let cache = [];
   stream.on('data', item => {
     cache.push(item);
@@ -128,7 +136,7 @@ function run(db) {
     db.close();
     // 爬取所有歌单结束时间
     const end = new Date();
-    console.info(`\n📑💿所有歌曲评论全部抓取完毕！`);
+    console.info(`\n📑💿歌曲评论已全部抓取完毕！`);
     console.info(`开始时间: ${start}`);
     console.info(`结束时间: ${end}`);
     console.info(`🕓耗时: ${(end.getTime()-start.getTime())/1000}s\n`);
@@ -159,11 +167,11 @@ function run(db) {
 
     }, (err, res) => {
       if (err) { console.error(err); } else {
-        // 每读取50个数据暂停1秒
-        console.info(`⏳每读取50个数据暂停1秒`);
+        // 每读取50个数据暂停3秒
+        console.info(`⏳每读取50个数据暂停3秒`);
         setTimeout(() => {
           process.nextTick(callback);   // next
-        }, 1000);
+        }, 3000);
       }
     });
   }

@@ -1,4 +1,4 @@
-/* crawler - music.163.com - playlists
+/* crawler - cloud-music - playlists
  * 获取所有的热门歌手及其热门歌曲
  * @ Cong Min */
 const request = require('superagent');
@@ -109,8 +109,8 @@ function runArtist(...params) {
 
 // 运行爬虫
 function run(db) {
-  const dbArtists = db.collection('music.163.com:artists');
-  const dbSongs = db.collection('music.163.com:songs');
+  const dbArtists = db.collection('cloud-music:artists');
+  const dbSongs = db.collection('cloud-music:songs');
   // 爬取所有歌手信息开始时间
   const start = new Date();
   let artistIndex = 0;  // 歌手所位于数据库中的序号

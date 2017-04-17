@@ -1,4 +1,4 @@
-/* crawler - music.163.com - config 配置
+/* crawler - cloud-music - config 配置
  * @ Cong Min */
 const Crypto = require('./Crypto.js');
 
