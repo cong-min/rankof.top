@@ -144,7 +144,7 @@ function run(db) {
   // 每读取50个数据执行一次toDo
   function toDo(records, callback) {
     // 异步并发获取歌曲评论
-    async.mapLimit(records, 5, (record, recordNext) => {
+    async.mapLimit(records, 2, (record, recordNext) => {
 
       // 爬取歌曲评论开始时间
       const songStart = new Date().getTime();
@@ -165,11 +165,11 @@ function run(db) {
 
     }, (err, res) => {
       if (err) { console.error(err); } else {
-        // 每读取50个数据暂停2.5秒
-        console.info(`⏳每读取50个数据暂停2.5秒\n`);
+        // 每读取50个数据暂停2秒
+        console.info(`⏳每读取50个数据暂停2秒\n`);
         setTimeout(() => {
           process.nextTick(callback);   // next
-        }, 2500);
+        }, 2000);
       }
     });
   }
