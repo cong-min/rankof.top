@@ -120,7 +120,7 @@ function run(db) {
   let cache = [];
   stream.on('data', item => {
     cache.push(item);
-    if (cache.length === 10) {
+    if (cache.length === 25) {
       stream.pause();
       process.nextTick(() => {
         toDo(cache, () => {
@@ -141,7 +141,7 @@ function run(db) {
   });
   stream.on('close', () => { console.log('query closed'); });
 
-  // 每读取10个数据执行一次toDo
+  // 每读取25个数据执行一次toDo
   function toDo(records, callback) {
     // 异步并发获取歌曲评论
     async.mapLimit(records, 2, (record, recordNext) => {
@@ -165,8 +165,8 @@ function run(db) {
 
     }, (err, res) => {
       if (err) { console.error(err); } else {
-        // 每读取10个数据暂停1秒
-        console.info(`⏳每读取10个数据暂停1秒\n`);
+        // 每读取25个数据暂停1秒
+        console.info(`⏳每读取25个数据暂停1秒\n`);
         setTimeout(() => {
           process.nextTick(callback);   // next
         }, 1000);
