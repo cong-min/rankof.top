@@ -111,6 +111,9 @@ function runArtist(...params) {
 function run(db) {
   const dbArtists = db.collection('cloud-music:artists');
   const dbSongs = db.collection('cloud-music:songs');
+  dbArtists.createIndex({ 'musicSize': 1 });
+  dbArtists.createIndex({ 'albumSize': 1 });
+  dbArtists.createIndex({ 'mvSize': 1 });
   // 爬取所有歌手信息开始时间
   const start = new Date();
   let artistIndex = 0;  // 歌手所位于数据库中的序号
@@ -177,7 +180,7 @@ function run(db) {
 }
 
 // 打开数据库，开启运行
-db.open((err, db) => {
+db.connect((err, db) => {
   if (err) { console.error(err); } else {
     run(db);
   }

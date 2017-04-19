@@ -98,6 +98,7 @@ function runSongComment(...params) {
 // 运行爬虫
 function run(db) {
   const dbSongs = db.collection('cloud-music:songs');
+  dbSongs.createIndex({ 'comment.total': 1 });
   // 爬取所有歌曲评论开始时间
   const start = new Date();
   const data = dbSongs.find({
@@ -177,7 +178,7 @@ function run(db) {
 }
 
 // 打开数据库，开启运行
-db.open((err, db) => {
+db.connect((err, db) => {
   if (err) { console.error(err); } else {
     run(db);
   }

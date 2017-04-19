@@ -225,7 +225,7 @@ function run(db) {
 }
 
 // 打开数据库，开启运行
-db.open((err, db) => {
+db.connect((err, db) => {
   if (err) { console.error(err); } else {
     run(db);
   }
