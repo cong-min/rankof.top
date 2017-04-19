@@ -1,6 +1,18 @@
 /* mongodb */
 const { MongoClient, Server, Db } = require('mongodb');
-const server = new Server('localhost', 27017);
-const db = new Db('rankoftop', server);
+const config = {
+  ip: '192.168.2.108',
+  port: 27017,
+  database: 'rankoftop',
+};
 
-module.exports = db;
+// 打开连接
+function connect(callback) {
+  MongoClient.connect(`mongodb://${config.ip}:${config.port}/${config.database}`, (err, db) => {
+    err ? callback(err) : callback(null, db);
+  });
+}
+
+module.exports = {
+  connect,
+};
