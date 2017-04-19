@@ -197,6 +197,10 @@ function run(db) {
   const dbPlaylists = db.collection('cloud-music:playlists');
   const dbSongs = db.collection('cloud-music:songs');
   const dbArtists = db.collection('cloud-music:artists');
+  dbPlaylists.createIndex({ 'commentCount': 1 });
+  dbPlaylists.createIndex({ 'shareCount': 1 });
+  dbPlaylists.createIndex({ 'playCount': 1 });
+  dbPlaylists.createIndex({ 'subscribedCount': 1 });
   const [beginPage, endPage] = [0, 43];   // 歌单分页开始页数, 结束页数
   const pages = new Array(endPage-beginPage+1).fill(beginPage).map((e, i) => i + e);
   // 爬取所有歌单开始时间

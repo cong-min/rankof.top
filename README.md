@@ -22,4 +22,13 @@ npm run server
 # 前后端生产构建 localhost:2017
 npm start  # npm run start
            # npm run build && npm run server
+
+# pm2守护进程
+npm run pm2  # npm run build && sudo pm2 start server/app.js --name 'rankof.top'
+
+# pm2重启进程
+npm run repm2  # npm run build && sudo pm2 restart 'rankof.top'
+
+# pm2结束进程
+npm run killpm2  # sudo pm2 delete 'rankof.top'
 ```

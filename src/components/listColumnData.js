@@ -67,6 +67,91 @@ export default {
       },
     ],
 
+    // 播放最多的歌单
+    'playlist-play': [
+      {
+        type: 'index',
+        title: '排行',
+        align: 'center',
+        width: 80,
+      },
+      {
+        title: '歌单',
+        key: 'name',
+        render(row) {
+          return `<a href="http://music.163.com/#/playlist?id=${row._id}" target="_blank">${row.name}</a>`;
+        },
+      },
+      {
+        title: '播放量',
+        key: 'playCount',
+        align: 'center',
+      },
+    ],
+    // 收藏最多的歌单
+    'playlist-star': [
+      {
+        type: 'index',
+        title: '排行',
+        align: 'center',
+        width: 80,
+      },
+      {
+        title: '歌单',
+        key: 'name',
+        render(row) {
+          return `<a href="http://music.163.com/#/playlist?id=${row._id}" target="_blank">${row.name}</a>`;
+        },
+      },
+      {
+        title: '收藏量',
+        key: 'subscribedCount',
+        align: 'center',
+      },
+    ],
+    // 播放最多的歌单
+    'playlist-share': [
+      {
+        type: 'index',
+        title: '排行',
+        align: 'center',
+        width: 80,
+      },
+      {
+        title: '歌单',
+        key: 'name',
+        render(row) {
+          return `<a href="http://music.163.com/#/playlist?id=${row._id}" target="_blank">${row.name}</a>`;
+        },
+      },
+      {
+        title: '分享量',
+        key: 'shareCount',
+        align: 'center',
+      },
+    ],
+    // 播放最多的歌单
+    'playlist-comment': [
+      {
+        type: 'index',
+        title: '排行',
+        align: 'center',
+        width: 80,
+      },
+      {
+        title: '歌单',
+        key: 'name',
+        render(row) {
+          return `<a href="http://music.163.com/#/playlist?id=${row._id}" target="_blank">${row.name}</a>`;
+        },
+      },
+      {
+        title: '评论数',
+        key: 'commentCount',
+        align: 'center',
+      },
+    ],
+
     // 单曲最多的歌手
     'artist-song': [
       {
@@ -88,7 +173,6 @@ export default {
         align: 'center',
       },
     ],
-
     // 专辑最多的歌手
     'artist-album': [
       {
@@ -131,7 +215,7 @@ export default {
         align: 'center',
       },
     ],
-  },
 
+  },
 
 };
