@@ -99,6 +99,7 @@ function runSongComment(...params) {
 function run(db) {
   const dbSongs = db.collection('cloud-music:songs');
   dbSongs.createIndex({ 'comment.total': 1 });
+  dbSongs.createIndex({ 'comment.hottest.count': 1 });
   // 爬取所有歌曲评论开始时间
   const start = new Date();
   const data = dbSongs.find({

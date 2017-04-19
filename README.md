@@ -1,23 +1,25 @@
-# rankof.top
+# Rank of Top
 
 > **毕业设计**
 > 
 > 网络社区热点爬取与分析系统
 
-## Build Setup
+## 开发
 
 ``` bash
-# install dependencies
-npm install
+# 安装依赖
+cnpm install
 
-# serve with hot reload at localhost:8080
+# 前端开发调试 localhost:8080
 npm run dev
 
-# build for production with minification
+# 前端生产构建
 npm run build
 
-# build for production and view the bundle analyzer report
-npm run build --report
-```
+# 服务端启动 localhost:2017
+npm run server
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+# 前后端生产构建 localhost:2017
+npm start  # npm run start
+           # npm run build && npm run server
+```
