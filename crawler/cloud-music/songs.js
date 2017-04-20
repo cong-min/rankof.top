@@ -146,7 +146,7 @@ function run(db) {
   // 每读取25个数据执行一次toDo
   function toDo(records, callback) {
     // 异步并发获取歌曲评论
-    async.mapLimit(records, 2, (record, recordNext) => {
+    async.mapLimit(records, 10, (record, recordNext) => {
 
       // 爬取歌曲评论开始时间
       const songStart = new Date().getTime();
