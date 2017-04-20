@@ -67,8 +67,7 @@ function saveSong(hotSong, dbSongs) {
     };
     // 保存歌曲
     dbSongs.insert(song, function(err, res) {
-      if (err) { console.error(`\t🔥歌曲 <${song._id}:${song.name}> 录入数据库失败`, err); }
-      else { console.info(`\t💿歌曲 <${song._id}:${song.name}> 录入成功`); }
+      if (!err) { console.info(`\t💿歌曲 <${song._id}:${song.name}> 录入成功`); }
       resolve();
     });
   });

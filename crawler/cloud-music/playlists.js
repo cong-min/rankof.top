@@ -89,8 +89,7 @@ function saveSong(track, dbSongs) {
     };
     // 保存歌曲
     dbSongs.insert(song, function(err, res) {
-      if (err) { console.error(`\t🔥歌曲 <${song._id}:${song.name}> 录入数据库失败`, err); }
-      else { console.info(`\t💿歌曲 <${song._id}:${song.name}> 录入成功`); }
+      if (!err) { console.info(`\t💿歌曲 <${song._id}:${song.name}> 录入成功`); }
       resolve();
     });
   });
@@ -106,8 +105,7 @@ function saveArtist(artists, dbArtists) {
     if (artist._id) {
       // 保存歌手
       dbArtists.insert(artist, function(err, res) {
-        if (err) { console.error(`\t\t🔥歌手 <${artist._id}:${artist.name}> 录入数据库失败`, err); }
-        else { console.info(`\t\t🎤歌手 <${artist._id}:${artist.name}> 录入成功`); }
+        if (!err) { console.info(`\t\t🎤歌手 <${artist._id}:${artist.name}> 录入成功`); }
         resolve();
       });
     } else {
