@@ -115,7 +115,7 @@ function run(db) {
   dbArtists.createIndex({ 'mvSize': 1 });
   // 爬取所有歌手信息开始时间
   const start = new Date();
-  const data = dbSongs.find({
+  const data = dbArtists.find({
     $or:[
       { 'updateTime': { $lte: new Date().getTime() - 24*60*60*1000 } },
       { 'updateTime': null }
