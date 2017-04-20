@@ -122,7 +122,7 @@ function run(db) {
   let cache = [];
   stream.on('data', item => {
     cache.push(item);
-    if (cache.length === 25) {
+    if (cache.length === 20) {
       stream.pause();
       process.nextTick(() => {
         toDo(cache, () => {
@@ -146,7 +146,7 @@ function run(db) {
   // 每读取25个数据执行一次toDo
   function toDo(records, callback) {
     // 异步并发获取歌曲评论
-    async.mapLimit(records, 10, (record, recordNext) => {
+    async.mapLimit(records, 2, (record, recordNext) => {
 
       // 爬取歌曲评论开始时间
       const songStart = new Date().getTime();
@@ -167,11 +167,11 @@ function run(db) {
 
     }, (err, res) => {
       if (err) { console.error(err); } else {
-        // 每读取25个数据暂停1秒
-        // console.info(`⏳每读取25个数据暂停1秒\n`);
-        // setTimeout(() => {
+        // 每读取20个数据暂停1秒
+        console.info(`⏳每读取20个数据暂停1秒\n`);
+        setTimeout(() => {
           process.nextTick(callback);   // next
-        // }, 1000);
+        }, 1000);
       }
     });
   }
