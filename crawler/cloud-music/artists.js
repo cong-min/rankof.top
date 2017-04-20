@@ -115,14 +115,23 @@ function run(db) {
   dbArtists.createIndex({ 'mvSize': 1 });
   // 爬取所有歌手信息开始时间
   const start = new Date();
-  let artistIndex = 0;  // 歌手所位于数据库中的序号
-  let artistCount;
+  const data = dbSongs.find({
+    $or:[
+      { 'updateTime': { $lte: new Date().getTime() - 24*60*60*1000 } },
+      { 'updateTime': null }
+    ]
+  });
+  let artistTotalCount, artistCount;   // 总歌手数, 待爬歌手数
   dbArtists.count().then(count => {
+    artistTotalCount = count;
+  });
+  data.count().then(count => {
     artistCount = count;
   });
+  let artistIndex = 0;  // 歌手所位于数据库中的序号
 
   // 利用stream读取大量数据
-  const stream = dbArtists.find().stream();
+  const stream = data.stream();
   let cache = [];
   stream.on('data', item => {
     cache.push(item);
@@ -164,7 +173,7 @@ function run(db) {
           console.info(`🕓该歌手信息耗时: ${(artistEnd-artistStart)/1000}s`,
             `总耗时: ${(artistEnd-start.getTime())/1000}s`);
         }
-        console.info(`⏳进度: [${artistIndex+1}/${artistCount}歌手]\n`);
+        console.info(`⏳进度: [${artistIndex+1}/${artistCount}歌曲] - [${artistIndex+1+(artistTotalCount-artistCount)}/${artistTotalCount}歌曲]\n`);
         artistIndex++;
         recordNext();
       });

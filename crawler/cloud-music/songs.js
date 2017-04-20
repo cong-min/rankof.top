@@ -104,7 +104,7 @@ function run(db) {
   const start = new Date();
   const data = dbSongs.find({
     $or:[
-      { 'comment.updateTime': { $lte: new Date().getTime() - 24*60*60*1000 } },
+      { 'comment.updateTime': { $lte: new Date().getTime() - 3*24*60*60*1000 } },
       { 'comment.updateTime': null }
     ]
   });
