@@ -1,5 +1,13 @@
 // 网易云音乐
+function updateTimeRender(updateTime, value) {
+  return `<Poptip trigger="hover" :content="${updateTime} | formatTime('更新时间：')" placement="bottom-end">${value}<Poptip>`;
+}
+
 export default {
+  $source: {
+    url: 'http://music.163.com',
+    name: '网易云音乐',
+  },
   /* 歌曲 */
   song: {
     $column: [
@@ -30,7 +38,7 @@ export default {
       key: 'comment',
       align: 'center',
       render(row) {
-        return row.comment.total;
+        return updateTimeRender(row.comment.updateTime, row.comment.total);
       },
     }],
   },
@@ -66,7 +74,7 @@ export default {
       align: 'center',
       width: 100,
       render(row) {
-        return row.comment.hottest.count;
+        return updateTimeRender(row.comment.updateTime, row.comment.hottest.count);
       },
     }],
   },
@@ -92,24 +100,36 @@ export default {
       title: '播放量',
       key: 'playCount',
       align: 'center',
+      render(row) {
+        return updateTimeRender(row.updateTime, row.playCount);
+      },
     }],
     // 收藏最多的歌单
     star: [{
       title: '收藏量',
       key: 'subscribedCount',
       align: 'center',
+      render(row) {
+        return updateTimeRender(row.updateTime, row.subscribedCount);
+      },
     }],
     // 播放最多的歌单
     share: [{
       title: '分享量',
       key: 'shareCount',
       align: 'center',
+      render(row) {
+        return updateTimeRender(row.updateTime, row.shareCount);
+      },
     }],
     // 评论最多的歌单
     comment: [{
       title: '评论数',
       key: 'commentCount',
       align: 'center',
+      render(row) {
+        return updateTimeRender(row.updateTime, row.commentCount);
+      },
     }],
   },
   /* 歌手 */
@@ -134,18 +154,27 @@ export default {
       title: '单曲数',
       key: 'musicSize',
       align: 'center',
+      render(row) {
+        return updateTimeRender(row.updateTime, row.musicSize);
+      },
     }],
     // 专辑最多的歌手
     album: [{
       title: '专辑数',
       key: 'albumSize',
       align: 'center',
+      render(row) {
+        return updateTimeRender(row.updateTime, row.albumSize);
+      },
     }],
     // MV最多的歌手
     mv: [{
       title: 'MV数',
       key: 'mvSize',
       align: 'center',
+      render(row) {
+        return updateTimeRender(row.updateTime, row.mvSize);
+      },
     }],
   },
 };

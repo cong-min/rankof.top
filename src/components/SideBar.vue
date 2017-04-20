@@ -5,7 +5,10 @@
         <Icon :type="item.icon"></Icon>
         {{ item.title }}
       </template>
-      <Menu-item v-for="child in item.children" :key="child.name" :name="child.name">{{ child.title }}</Menu-item>
+      <Menu-item class="menu-item" v-for="child in item.children" :key="child.name" :name="child.name">
+        <Icon class="right-icon" :type="child.icon || 'arrow-graph-up-right'"></Icon>
+        {{ child.title }}
+      </Menu-item>
     </Submenu>
   </Menu>
 </template>
@@ -81,5 +84,16 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.menu-item {
+  padding-left: 42px !important;
+}
+.right-icon {
+  float: right;
+  position: relative;
+  top: 4px;
+  color: #d7dde4;
+}
+.ivu-menu-item-selected .right-icon {
+  color: #39f;
+}
 </style>

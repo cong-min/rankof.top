@@ -3,12 +3,11 @@ module.exports = router => {
   const prefix = '/api/cloud-music';
 
   // 请求响应
-  function response({ req, res, next }, { err, docs }, { db, obj }) {
+  function response({ req, res, next }, { err, docs }, db) {
     if (err) { res.status(500).send(err); } else {
       db.count().then(count => {
         res.status(200).send({
           total: count,
-          updateTime: obj.updateTime,
           listData: docs
         });
       });
@@ -23,7 +22,7 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          { db: dbSongs, obj: docs[0].comment }
+          dbSongs
         );
       });
   });
@@ -37,7 +36,7 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          { db: dbSongs, obj: docs[0].comment }
+          dbSongs
         );
       });
   });
@@ -51,7 +50,7 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          { db: dbPlaylists, obj: docs[0] }
+          dbPlaylists
         );
       });
   });
@@ -64,7 +63,7 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          { db: dbPlaylists, obj: docs[0] }
+          dbPlaylists
         );
       });
   });
@@ -77,7 +76,7 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          { db: dbPlaylists, obj: docs[0] }
+          dbPlaylists
         );
       });
   });
@@ -90,7 +89,7 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          { db: dbPlaylists, obj: docs[0] }
+          dbPlaylists
         );
       });
   });
@@ -104,7 +103,7 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          { db: dbArtists, obj: docs[0] }
+          dbArtists
         );
       });
   });
@@ -117,7 +116,7 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          { db: dbArtists, obj: docs[0] }
+          dbArtists
         );
       });
   });
@@ -130,7 +129,7 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          { db: dbArtists, obj: docs[0] }
+          dbArtists
         );
       });
   });

@@ -6,6 +6,7 @@ import iView from 'iview';
 import 'iview/dist/styles/iview.css';
 import App from './App';
 import router from './router';
+import './filters';
 
 Vue.use(VueResource);
 Vue.use(iView);

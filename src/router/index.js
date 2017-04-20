@@ -33,7 +33,6 @@ export default new Router({
           path: '',
           name: 'site',
           components: {
-            default: Site,
             rankList: RankList,
             visual: Visual,
           },
@@ -43,7 +42,6 @@ export default new Router({
           path: ':page',
           name: 'page',
           components: {
-            default: Site,
             rankList: RankList,
             visual: Visual,
           },

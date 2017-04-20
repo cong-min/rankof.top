@@ -9,8 +9,10 @@
     </div>
     <template v-else>
       <p class="table-note">
-        <span class="table-note-left" v-if="total">共统计 {{ total }} 个{{dataType}}</span>
-        <span class="table-note-right" v-if="updateTime">最后更新时间：{{ updateTime | formatTime }}</span>
+        <span class="table-note-left" v-if="total">不完全统计共 {{ total }} 个{{ dataType }}</span>
+        <span class="table-note-right" v-if="source">
+          数据来源：<a :href="source.url" target="_blank">{{ source.name }}</a>
+        </span>
       </p>
       <Table :columns="listColumn" :data="listData" size="large"></Table>
     </template>
@@ -22,27 +24,6 @@ import rankListColumnData from './rankListColumnData';
 
 export default {
 
-  filters: {
-    formatTime(timestamp) {
-      if (!timestamp) return null;
-      const date = new Date();
-      date.setTime(timestamp);
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      const hour = date.getHours();
-      const minute = date.getMinutes();
-      const second = date.getSeconds();
-      function formatNumber(num) {  // 格式化数字
-        const n = num.toString();
-        return n[1] ? n : `0${n}`;
-      }
-      const formattedDate = [year, month, day].map(formatNumber).join('-');
-      const formattedTime = [hour, minute, second].map(formatNumber).join(':');
-      return `${formattedDate} ${formattedTime}`;
-    },
-  },
-
   data() {
     return {
       loading: true,
@@ -50,7 +31,7 @@ export default {
       listData: [],
       total: 0,
       dataType: null,
-      updateTime: null,
+      source: null,
     };
   },
 
@@ -74,13 +55,13 @@ export default {
       // pre表示大类，suf表示小类
       const [pre, suf] = page.split('-');
       const $column = siteData[pre].$column;
+      this.source = siteData.$source;
       this.listColumn = $column.concat(siteData[pre][suf]); // 合并数据
       this.dataType = $column[1].title;
       // 获取listData
       this.$http.get(`/api/${site}/${page}`).then((res) => {
         if (res.status === 200) {
           this.listData = res.body.listData;
-          this.updateTime = res.body.updateTime;
           this.total = res.body.total;
         } else {
           this.$Message.error(`${res.status}: ${res.bodyText}`);
@@ -111,6 +92,9 @@ export default {
   color: #9ea7b4;
   overflow: hidden;
   margin: -5px auto 10px;
+}
+.table-note a {
+  color: #9ea7b4;
 }
 .table-note-left {
   float: left;

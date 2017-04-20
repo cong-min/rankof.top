@@ -6,6 +6,7 @@ export default [
     icon: 'music-note',
     children: [
       { name: 'song-comment', title: '评论数最多的歌曲 Top100', pageType: 'rankList' },
+      { name: 'song-comment-visual', title: '评论数上万的歌曲统计分析', pageType: 'visual', icon: 'ios-pulse-strong' },
     ],
   },
   {

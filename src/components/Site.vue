@@ -24,14 +24,21 @@ export default {
 
   data() {
     return {
-      pageType: 'rankList',
-      msg: 'Welcome to Your Vue.js App',
+      pageType: null,
     };
   },
 
-  computed: {
-    pageType() {
-      return this.$root.pageType;
+  watch: {
+    $route: 'setPageType',
+  },
+
+  mounted() {
+    this.setPageType();
+  },
+
+  methods: {
+    setPageType() {
+      this.pageType = this.$root.pageType;
     },
   },
 
