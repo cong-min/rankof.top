@@ -54,7 +54,7 @@ function catchPromiseError(error) {
 function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
   return new Promise((resolve, reject) => {
     const songComment = {
-      id: commentId,                                   // 评论区id
+      id: commentId,                        // 评论区id
       total,                                // 评论总数
       hottest: !hotComment ? {} : {
         count: hotComment.likedCount,       // 最火热评点赞总数
@@ -168,10 +168,10 @@ function run(db) {
     }, (err, res) => {
       if (err) { console.error(err); } else {
         // 每读取25个数据暂停1秒
-        console.info(`⏳每读取25个数据暂停1秒\n`);
-        setTimeout(() => {
+        // console.info(`⏳每读取25个数据暂停1秒\n`);
+        // setTimeout(() => {
           process.nextTick(callback);   // next
-        }, 1000);
+        // }, 1000);
       }
     });
   }
