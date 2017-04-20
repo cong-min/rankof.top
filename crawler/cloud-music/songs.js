@@ -75,8 +75,8 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
 // 运行爬取歌曲评论
 function runSongComment(...params) {
   const [record, dbSongs, cb] = params;
-  if (record.comment.updateTime && new Date().getTime() - record.comment.updateTime < 24*60*60*1000) {
-    // 如果评论有updateTime，并且updateTime距今相差小于24小时，则跳过此歌曲评论的爬取
+  if (record.comment.updateTime && new Date().getTime() - record.comment.updateTime < 3*24*60*60*1000) {
+    // 如果评论有updateTime，并且updateTime距今相差小于3天，则跳过此歌曲评论的爬取
     typeof cb === 'function' && cb('skip');
     return;
   }

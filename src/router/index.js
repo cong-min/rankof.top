@@ -1,26 +1,55 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 import Home from '@/components/Home';
-import List from '@/components/List';
+import About from '@/components/About';
+import Site from '@/components/Site';
+import RankList from '@/components/RankList';
+import Visual from '@/components/Visual';
 
 Vue.use(Router);
 
 export default new Router({
   routes: [
     {
+      path: '/home',
+      redirect: () => '/',
+    },
+    {
       path: '/',
       name: 'home',
       component: Home,
     },
     {
-      path: '/:site',
-      name: 'site',
-      component: List,
+      path: '/about',
+      name: 'about',
+      component: About,
     },
     {
-      path: '/:site/:list',
-      name: 'list',
-      component: List,
+      path: '/:site',
+      component: Site,
+      children: [
+        // 匹配/:site
+        {
+          path: '',
+          name: 'site',
+          components: {
+            default: Site,
+            rankList: RankList,
+            visual: Visual,
+          },
+        },
+        // 匹配/:site/:page
+        {
+          path: ':page',
+          name: 'page',
+          components: {
+            default: Site,
+            rankList: RankList,
+            visual: Visual,
+          },
+        },
+      ],
     },
+
   ],
 });

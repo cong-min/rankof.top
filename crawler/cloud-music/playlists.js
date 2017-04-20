@@ -60,7 +60,8 @@ function savePlaylist({ id, name, commentCount, shareCount, playCount, subscribe
       commentCount,                         // 歌单评论数
       shareCount,                           // 歌单分享量
       playCount,                            // 歌单播放量
-      subscribedCount                       // 歌单收藏量
+      subscribedCount,                      // 歌单收藏量
+      updateTime: new Date().getTime()
     };
     // 保存歌单
     dbPlaylists.save(playlist, function(err, res) {

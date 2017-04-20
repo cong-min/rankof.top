@@ -1,12 +1,11 @@
 <template>
   <Menu ref="navBarMenu" mode="horizontal" theme="primary" :active-name="menu.activeName" width="auto" @on-select="selectLink">
-    <menu-item class="logo" name="home">
-      Rank of Top
-    </menu-item>
+    <menu-item class="logo" name="home">Rank of Top</menu-item>
     <Menu-item v-for="item in menu.list" :key="item.name" :name="item.name">
       <Icon :type="item.icon"></Icon>
       {{ item.title }}
     </Menu-item>
+    <menu-item class="about" name="about">About</menu-item>
   </Menu>
 </template>
 
@@ -40,16 +39,12 @@ export default {
   methods: {
     selectLink(name) {
       // 改变路由
-      this.$router.push(name === 'home' ? '/' : {
-        name: 'site',
-        params: {
-          site: name,
-        },
-      });
+      this.$router.push(`/${name}`);
       this.siteChange(name);
     },
 
-    siteChange(site) {
+    siteChange(name) {
+      const site = name || this.$route.name;
       // site改变
       this.$root.site = site;
       this.menu.activeName = site;
@@ -71,5 +66,8 @@ export default {
   font-weight: 100;
   color: #fff;
   text-align: center;
+}
+.about {
+  float: right;
 }
 </style>

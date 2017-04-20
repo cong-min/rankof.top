@@ -40,29 +40,34 @@ export default {
   methods: {
     selectLink(name) {
       this.$router.push({
-        name: 'list',
+        name: 'page',
         params: {
-          list: name,
+          page: name,
         },
       });
-      this.listChange(name);
+      this.pageChange(name);
     },
 
     getSideBarData() {
       // site改变
-      const { site, list } = this.$route.params;
+      const { site, page } = this.$route.params;
       if (site !== this.site) {
         const data = sideBarData[site];
         this.site = site;
         this.menu.list = data;
         this.menu.openNames = data.map(e => e.name);
-        this.listChange(list || data[0].children[0].name);
+        this.pageChange(page || data[0].children[0].name);
       }
     },
 
-    listChange(list) {
-      this.$root.list = list;
-      this.menu.activeName = list;
+    pageChange(page) {
+      // page改变
+      const target = sideBarData[this.site]
+        .find(e => e.name === page.split('-')[0])
+        .children.find(e => e.name === page);
+      this.$root.pageType = target.pageType;
+      this.$root.page = page;
+      this.menu.activeName = page;
       this.$nextTick(() => {
         this.$refs.sideBarMenu.updateActiveName();
         this.$refs.sideBarMenu.updateOpened();

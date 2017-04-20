@@ -11,7 +11,7 @@
     "server": "node server/app.js",
     "start": "npm run build && npm run server",
     "pm2": "npm run build && sudo pm2 start server/app.js --name 'rankof.top'",
-    "repm2": "sudo pm2 restart 'rankof.top'",
+    "repm2": "npm run build && sudo pm2 restart 'rankof.top'",
     "deletepm2": "sudo pm2 delete 'rankof.top'"
   },
   "dependencies": {

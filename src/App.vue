@@ -2,10 +2,16 @@
   <div id="app" class="wrapper">
     <!-- 导航栏 -->
     <nav-bar></nav-bar>
+    <!-- 路由正文 -->
     <router-view></router-view>
-    <div class="copy">
-      2017 &copy; Cong Min.
-    </div>
+    <!-- 返回顶部 -->
+    <Back-top>
+      <div class="back-top">
+        <Icon type="chevron-up"></Icon>
+      </div>
+    </Back-top>
+    <!-- 版权 -->
+    <router-link to="/about" class="copy">2017 &copy; Cong Min.</router-link>
   </div>
 </template>
 
@@ -44,7 +50,28 @@ export default {
 .content {
   margin: 30px;
 }
+.content:after {
+  content: "";
+  display: block;
+  width: 1px;
+  background: #d7dde4;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1px;
+}
+.back-top {
+  background: rgba(0, 153, 229, .7);
+  font-size: 24px;
+  color: #fff;
+  text-align: center;
+  border-radius: 3px;
+}
+.back-top:hover {
+  background: rgba(0, 153, 229, .8);
+}
 .copy {
+  display: block;
   text-align: center;
   padding: 10px 0 20px;
   color: #9ea7b4;
