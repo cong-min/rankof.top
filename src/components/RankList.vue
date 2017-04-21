@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import rankListColumnData from './rankListColumnData';
+import rankListPreset from './rankListPreset';
 
 export default {
 
@@ -51,7 +51,7 @@ export default {
       Object.assign(this.$data, this.$options.data());
       const { site, page } = this.$root;
       // siteData表示该site的column数据
-      const siteData = rankListColumnData[site];
+      const siteData = rankListPreset[site];
       // pre表示大类，suf表示小类
       const [pre, suf] = page.split('-');
       const $column = siteData[pre].$column;

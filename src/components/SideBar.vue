@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import sideBarData from './sideBarData';  // 侧边栏数据
+import sideBarPreset from './sideBarPreset';  // 侧边栏数据
 
 export default {
 
@@ -55,7 +55,7 @@ export default {
       // site改变
       const { site, page } = this.$route.params;
       if (site !== this.site) {
-        const data = sideBarData[site];
+        const data = sideBarPreset[site];
         this.site = site;
         this.menu.list = data;
         this.menu.openNames = data.map(e => e.name);
@@ -65,7 +65,7 @@ export default {
 
     pageChange(page) {
       // page改变
-      const target = sideBarData[this.site]
+      const target = sideBarPreset[this.site]
         .find(e => e.name === page.split('-')[0])
         .children.find(e => e.name === page);
       this.$root.pageType = target.pageType;

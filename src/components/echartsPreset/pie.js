@@ -5,9 +5,6 @@ const init = (title, name) => ({
     text: title,
     left: 'center',
     top: 0,
-    textStyle: {
-      color: '#657180',
-    },
   },
   tooltip: {
     trigger: 'item',
@@ -41,7 +38,7 @@ const init = (title, name) => ({
       itemStyle: {
         normal: {
           color: '#5cadff',
-          shadowBlur: 100,
+          shadowBlur: 150,
           shadowColor: 'rgba(0, 0, 0, 0.3)',
         },
       },

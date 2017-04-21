@@ -75,8 +75,8 @@ function saveSongComment(song, { commentId, total, hotComment }, dbSongs) {
 // 运行爬取歌曲评论
 function runSongComment(...params) {
   const [record, dbSongs, cb] = params;
-  if (record.comment.updateTime && new Date().getTime() - record.comment.updateTime < 3*24*60*60*1000) {
-    // 如果评论有updateTime，并且updateTime距今相差小于3天，则跳过此歌曲评论的爬取
+  if (record.comment.updateTime && new Date().getTime() - record.comment.updateTime < 5*24*60*60*1000) {
+    // 如果评论有updateTime，并且updateTime距今相差小于5天，则跳过此歌曲评论的爬取
     typeof cb === 'function' && cb('skip');
     return;
   }
@@ -104,7 +104,7 @@ function run(db) {
   const start = new Date();
   const data = dbSongs.find({
     $or:[
-      { 'comment.updateTime': { $lte: new Date().getTime() - 3*24*60*60*1000 } },
+      { 'comment.updateTime': { $lte: new Date().getTime() - 5*24*60*60*1000 } },
       { 'comment.updateTime': null }
     ]
   });
@@ -122,7 +122,7 @@ function run(db) {
   let cache = [];
   stream.on('data', item => {
     cache.push(item);
-    if (cache.length === 20) {
+    if (cache.length === 25) {
       stream.pause();
       process.nextTick(() => {
         toDo(cache, () => {
@@ -146,7 +146,7 @@ function run(db) {
   // 每读取25个数据执行一次toDo
   function toDo(records, callback) {
     // 异步并发获取歌曲评论
-    async.mapLimit(records, 2, (record, recordNext) => {
+    async.mapLimit(records, 10, (record, recordNext) => {
 
       // 爬取歌曲评论开始时间
       const songStart = new Date().getTime();
@@ -167,8 +167,8 @@ function run(db) {
 
     }, (err, res) => {
       if (err) { console.error(err); } else {
-        // 每读取20个数据暂停1秒
-        // console.info(`⏳每读取20个数据暂停1秒\n`);
+        // 每读取25个数据暂停1秒
+        // console.info(`⏳每读取25个数据暂停1秒\n`);
         // setTimeout(() => {
           process.nextTick(callback);   // next
         // }, 1000);
