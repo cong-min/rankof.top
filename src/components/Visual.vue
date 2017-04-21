@@ -1,7 +1,8 @@
 <template>
   <div>
     <template v-for="chart in visualData">
-      <Chart class="chart" :key="chart.name" :ref="chart.type" :options="echartsOptions[chart.type]" theme="walden"></Chart>
+      <Chart class="chart" theme="walden" :key="chart.name" :ref="chart.name"
+             :options="echartsOptions[chart.type].init(chart.name, chart.label)"></Chart>
     </template>
   </div>
 </template>
@@ -50,7 +51,7 @@ export default {
       this.visualData = visualPreset[site][page];
       this.$nextTick(() => {
         this.visualData.forEach((e) => {
-          const $chart = this.$refs[e.type];    // 实例chart
+          const $chart = this.$refs[e.name][0];    // 实例chart
           const Chart = echartsPreset[e.type];  // Chart预设模块
           Chart.loading($chart);
           this.$http.get('/api/cloud-music/song-comment').then((res) => {
