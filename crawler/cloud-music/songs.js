@@ -168,10 +168,10 @@ function run(db) {
     }, (err, res) => {
       if (err) { console.error(err); } else {
         // 每读取20个数据暂停1秒
-        console.info(`⏳每读取20个数据暂停1秒\n`);
-        setTimeout(() => {
+        // console.info(`⏳每读取20个数据暂停1秒\n`);
+        // setTimeout(() => {
           process.nextTick(callback);   // next
-        }, 1000);
+        // }, 1000);
       }
     });
   }
