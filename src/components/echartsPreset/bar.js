@@ -19,6 +19,9 @@ const init = (title, name) => ({
       type: 'shadow',
       label: {
         show: true,
+        textStyle: {
+          color: '#666666',
+        },
       },
     },
   },
@@ -30,6 +33,9 @@ const init = (title, name) => ({
     },
   },
   yAxis: {
+    splitLine: {
+      show: false,
+    },
   },
   series: [{
     name,

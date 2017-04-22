@@ -1,8 +1,14 @@
 <template>
   <div>
+    <p class="page-note">
+      <span class="page-note-left" v-if="total">不完全统计共 {{ total }} 个{{ dataType }}</span>
+      <span class="page-note-right" v-if="source">
+        爬取数据来源：<a :href="source.url" target="_blank">{{ source.name }}</a>
+      </span>
+    </p>
     <template v-for="chart in visualData">
-      <Chart class="chart" theme="walden" :key="chart.name" :ref="chart.name"
-             :options="echartsOptions[chart.type].init(chart.name, chart.label)"></Chart>
+      <Chart class="chart" theme="walden" :key="chart.title" :ref="chart.title"
+             :options="chart.initOptions"></Chart>
     </template>
   </div>
 </template>
@@ -31,7 +37,9 @@ export default {
   data() {
     return {
       visualData: [],
-      echartsOptions: echartsPreset,
+      total: 0,
+      dataType: null,
+      source: null,
     };
   },
 
@@ -48,16 +56,27 @@ export default {
   methods: {
     getVisualData() {
       const { site, page } = this.$root;
-      this.visualData = visualPreset[site][page];
+      const siteData = visualPreset[site];
+      const pageData = siteData[page];
+      this.source = siteData.$source;    // 数据来源
+      this.dataType = pageData.$dataType;   // 数据类型
+      const $charts = pageData.$charts;
+      this.visualData = $charts.map(e => ({
+        type: e.type,
+        title: e.title,
+        label:e.label,
+        initOptions: echartsPreset[e.type].init(e.title, e.label),    // init options
+      }));
       this.$nextTick(() => {
-        this.visualData.forEach((e) => {
-          const $chart = this.$refs[e.name][0];    // 实例chart
-          const Chart = echartsPreset[e.type];  // Chart预设模块
+        $charts.forEach((e) => {
+          const $chart = this.$refs[e.title][0];    // 实例chart
+          const Chart = echartsPreset[e.type];    // Chart预设模块
           Chart.loading($chart);
-          this.$http.get('/api/cloud-music/song-comment').then((res) => {
+          this.$http.get(`/api/${site}/${e.requestPath}`).then((res) => {
             if (res.status === 200) {
-              const data = e.processing(res.body, Chart);
-              $chart.mergeOptions(data);
+              const { data, total } = e.processing(res.body, Chart);
+              $chart.mergeOptions(data);    // merge options
+              if (total) { this.total = total; }
             } else {
               this.$Message.error(`${res.status}: ${res.bodyText}`);
             }
@@ -80,5 +99,19 @@ export default {
 .chart {
   margin: 0 auto;
   padding: 15px 0;
+}
+.page-note {
+  color: #9ea7b4;
+  overflow: hidden;
+  margin: -5px auto 10px;
+}
+.page-note a {
+  color: #9ea7b4;
+}
+.page-note-left {
+  float: left;
+}
+.page-note-right {
+  float: right;
 }
 </style>

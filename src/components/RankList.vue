@@ -8,10 +8,10 @@
       </Spin>
     </div>
     <template v-else>
-      <p class="table-note">
-        <span class="table-note-left" v-if="total">不完全统计共 {{ total }} 个{{ dataType }}</span>
-        <span class="table-note-right" v-if="source">
-          数据来源：<a :href="source.url" target="_blank">{{ source.name }}</a>
+      <p class="page-note">
+        <span class="page-note-left" v-if="total">不完全统计共 {{ total }} 个{{ dataType }}</span>
+        <span class="page-note-right" v-if="source">
+          爬取数据来源：<a :href="source.url" target="_blank">{{ source.name }}</a>
         </span>
       </p>
       <Table :columns="listColumn" :data="listData" size="large"></Table>
@@ -55,9 +55,9 @@ export default {
       // pre表示大类，suf表示小类
       const [pre, suf] = page.split('-');
       const $column = siteData[pre].$column;
-      this.source = siteData.$source;
+      this.dataType = siteData[pre].$dataType;    // 数据类型
+      this.source = siteData.$source;   // 数据来源
       this.listColumn = $column.concat(siteData[pre][suf]); // 合并数据
-      this.dataType = $column[1].title;
       // 获取listData
       this.$http.get(`/api/${site}/${page}`).then((res) => {
         if (res.status === 200) {
@@ -88,18 +88,18 @@ export default {
   50%  { transform: rotate(180deg);}
   to   { transform: rotate(360deg);}
 }
-.table-note {
+.page-note {
   color: #9ea7b4;
   overflow: hidden;
   margin: -5px auto 10px;
 }
-.table-note a {
+.page-note a {
   color: #9ea7b4;
 }
-.table-note-left {
+.page-note-left {
   float: left;
 }
-.table-note-right {
+.page-note-right {
   float: right;
 }
 </style>

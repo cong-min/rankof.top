@@ -10,6 +10,7 @@ export default {
   },
   /* 歌曲 */
   song: {
+    $dataType: '歌曲',
     $column: [
       {
         type: 'index',
@@ -44,6 +45,7 @@ export default {
   },
   /* 评论 */
   comment: {
+    $dataType: '歌曲',
     $column: [
       {
         type: 'index',
@@ -80,6 +82,7 @@ export default {
   },
   /* 歌单 */
   playlist: {
+    $dataType: '歌单',
     $column: [
       {
         type: 'index',
@@ -134,6 +137,7 @@ export default {
   },
   /* 歌手 */
   artist: {
+    $dataType: '歌手',
     $column: [
       {
         type: 'index',

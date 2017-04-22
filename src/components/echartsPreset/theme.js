@@ -1,5 +1,5 @@
 /* eslint-disable */
-// echarts theme walden [revision]
+// echarts theme walden - revision
 export default {
   "color": [
     // "#3fb1e3",
@@ -152,7 +152,8 @@ export default {
         "color": "#e6a0d2",
         "color0": "transparent",
         "borderColor": "#e6a0d2",
-        "borderColor0": "#3fb1e3",
+        // "borderColor0": "#3fb1e3",
+        "borderColor0": "#5cadff",
         "borderWidth": "2"
       }
     }
@@ -174,7 +175,8 @@ export default {
     "symbol": "emptyCircle",
     "smooth": false,
     "color": [
-      "#3fb1e3",
+      // "#3fb1e3",
+      "#5cadff",
       "#6be6c1",
       "#626c91",
       "#a0a7e6",
@@ -198,7 +200,8 @@ export default {
       },
       "emphasis": {
         "areaColor": "rgba(63,177,227,0.25)",
-        "borderColor": "#3fb1e3",
+        // "borderColor": "#3fb1e3",
+        "borderColor": "#5cadff",
         "borderWidth": 1
       }
     },
@@ -224,7 +227,8 @@ export default {
       },
       "emphasis": {
         "areaColor": "rgba(63,177,227,0.25)",
-        "borderColor": "#3fb1e3",
+        // "borderColor": "#3fb1e3",
+        "borderColor": "#5cadff",
         "borderWidth": 1
       }
     },
@@ -245,7 +249,8 @@ export default {
     "axisLine": {
       "show": true,
       "lineStyle": {
-        "color": "#cccccc"
+        // "color": "#cccccc"
+        "color": "rgba(252,525,252,0)"
       }
     },
     "axisTick": {
@@ -443,7 +448,8 @@ export default {
       }
     },
     "checkpointStyle": {
-      "color": "#3fb1e3",
+      // "color": "#3fb1e3",
+      "color": "#5cadff",
       "borderColor": "rgba(63,177,227,0.15)"
     },
     "label": {
