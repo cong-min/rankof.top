@@ -20,7 +20,7 @@ const init = (title, name) => ({
       label: {
         show: true,
         textStyle: {
-          color: '#666666',
+          color: '#999999',
         },
       },
     },
@@ -33,7 +33,7 @@ const init = (title, name) => ({
     },
   },
   yAxis: {
-    splitLine: {
+    axisLine: {
       show: false,
     },
   },
