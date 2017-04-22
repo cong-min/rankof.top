@@ -1,7 +1,7 @@
 <template>
   <div>
     <p class="page-note">
-      <span class="page-note-left" v-if="total">不完全统计共 {{ total }} 个{{ dataType }}</span>
+      <span class="page-note-left" v-if="total">不完全统计共 {{ total }} 个{{ dataType }}，最后更新时间：{{ updateTime | formatDate }}</span>
       <span class="page-note-right" v-if="source">
         爬取数据来源：<a :href="source.url" target="_blank">{{ source.name }}</a>
       </span>
@@ -39,6 +39,7 @@ export default {
       visualData: [],
       total: 0,
       dataType: null,
+      updateTime: null,
       source: null,
     };
   },
@@ -74,9 +75,10 @@ export default {
           Chart.loading($chart);
           this.$http.get(`/api/${site}/${e.requestPath}`).then((res) => {
             if (res.status === 200) {
-              const { data, total } = e.processing(res.body, Chart);
+              const { data, total, updateTime } = e.processing(res.body, Chart);
               $chart.mergeOptions(data);    // merge options
               if (total) { this.total = total; }
+              if (updateTime) { this.updateTime = updateTime; }
             } else {
               this.$Message.error(`${res.status}: ${res.bodyText}`);
             }

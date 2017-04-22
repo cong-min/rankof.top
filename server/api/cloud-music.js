@@ -3,12 +3,13 @@ module.exports = router => {
   const prefix = '/api/cloud-music';
 
   // 请求响应
-  function response({ req, res, next }, { err, docs }, db) {
+  function response({ req, res, next }, { err, docs }, db, updateTime) {
     if (err) { res.status(500).send(err); } else {
       db.count().then(count => {
         res.status(200).send({
           total: count,
-          listData: docs
+          listData: docs,
+          updateTime
         });
       });
     }
@@ -22,7 +23,8 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          dbSongs
+          dbSongs,
+          docs[0].comment.updateTime  // updateTime
         );
       });
   });
@@ -36,7 +38,8 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          dbSongs
+          dbSongs,
+          docs[0].comment.updateTime  // updateTime
         );
       });
   });
@@ -50,7 +53,8 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          dbPlaylists
+          dbPlaylists,
+          docs[0].updateTime  // updateTime
         );
       });
   });
@@ -63,7 +67,8 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          dbPlaylists
+          dbPlaylists,
+          docs[0].updateTime  // updateTime
         );
       });
   });
@@ -76,7 +81,8 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          dbPlaylists
+          dbPlaylists,
+          docs[0].updateTime  // updateTime
         );
       });
   });
@@ -89,7 +95,8 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          dbPlaylists
+          dbPlaylists,
+          docs[0].updateTime  // updateTime
         );
       });
   });
@@ -103,7 +110,8 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          dbArtists
+          dbArtists,
+          docs[0].updateTime  // updateTime
         );
       });
   });
@@ -116,7 +124,8 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          dbArtists
+          dbArtists,
+          docs[0].updateTime  // updateTime
         );
       });
   });
@@ -129,7 +138,8 @@ module.exports = router => {
         response(
           { req, res, next },
           { err, docs },
-          dbArtists
+          dbArtists,
+          docs[0].updateTime  // updateTime
         );
       });
   });

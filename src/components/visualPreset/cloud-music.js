@@ -23,6 +23,7 @@ export default {
           return {
             data: Chart.update(xData, yData, '评论数'),
             total: result.total,
+            updateTime: result.updateTime,
           };
         },
       },

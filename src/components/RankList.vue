@@ -9,7 +9,7 @@
     </div>
     <template v-else>
       <p class="page-note">
-        <span class="page-note-left" v-if="total">不完全统计共 {{ total }} 个{{ dataType }}</span>
+        <span class="page-note-left" v-if="total">不完全统计共 {{ total }} 个{{ dataType }}，最后更新时间：{{ updateTime | formatDate }}</span>
         <span class="page-note-right" v-if="source">
           爬取数据来源：<a :href="source.url" target="_blank">{{ source.name }}</a>
         </span>
@@ -31,6 +31,7 @@ export default {
       listData: [],
       total: 0,
       dataType: null,
+      updateTime: null,
       source: null,
     };
   },
@@ -63,6 +64,7 @@ export default {
         if (res.status === 200) {
           this.listData = res.body.listData;
           this.total = res.body.total;
+          this.updateTime = res.body.updateTime;
         } else {
           this.$Message.error(`${res.status}: ${res.bodyText}`);
         }
