@@ -64,7 +64,7 @@ export default {
       this.visualData = $charts.map(e => ({
         type: e.type,
         title: e.title,
-        label:e.label,
+        label: e.label,
         initOptions: echartsPreset[e.type].init(e.title, e.label),    // init options
       }));
       this.$nextTick(() => {
