@@ -173,7 +173,7 @@ function run(db) {
           console.info(`🕓该歌手信息耗时: ${(artistEnd-artistStart)/1000}s`,
             `总耗时: ${(artistEnd-start.getTime())/1000}s`);
         }
-        console.info(`⏳进度: [${artistIndex+1}/${artistCount}歌曲] - [${artistIndex+1+(artistTotalCount-artistCount)}/${artistTotalCount}歌曲]\n`);
+        console.info(`⏳进度: [${artistIndex+1}/${artistCount}歌手] - [${artistIndex+1+(artistTotalCount-artistCount)}/${artistTotalCount}歌手]\n`);
         artistIndex++;
         recordNext();
       });
