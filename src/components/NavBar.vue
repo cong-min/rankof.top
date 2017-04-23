@@ -18,8 +18,8 @@ export default {
         activeName: this.$route.params.site || 'home',
         list: [
           { name: 'cloud-music', title: '网易云音乐', icon: 'music-note' },
-          { name: 'zhihu', title: '知乎', icon: 'chatbox-working' },
-          { name: 'weibo', title: '微博', icon: 'social-rss' },
+//          { name: 'zhihu', title: '知乎', icon: 'chatbox-working' },
+//          { name: 'weibo', title: '微博', icon: 'social-rss' },
         ],
       },
     };
@@ -40,7 +40,6 @@ export default {
     selectLink(name) {
       // 改变路由
       this.$router.push(`/${name}`);
-      this.siteChange(name);
     },
 
     siteChange(name) {

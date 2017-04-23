@@ -2,7 +2,7 @@
   <Row class="container">
     <Col span="6">
       <!-- 侧边栏 -->
-      <side-bar></side-bar>
+      <side-bar @pageChange="setPageType"></side-bar>
     </Col>
     <Col span="18">
       <router-view :name="pageType" class="content"></router-view>
@@ -28,17 +28,9 @@ export default {
     };
   },
 
-  watch: {
-    $route: 'setPageType',
-  },
-
-  mounted() {
-    this.setPageType();
-  },
-
   methods: {
-    setPageType() {
-      this.pageType = this.$root.pageType;
+    setPageType(pageType) {
+      this.pageType = pageType;
     },
   },
 

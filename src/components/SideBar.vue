@@ -48,19 +48,18 @@ export default {
           page: name,
         },
       });
-      this.pageChange(name);
     },
 
     getSideBarData() {
       // site改变
       const { site, page } = this.$route.params;
+      const data = sideBarPreset[site];
       if (site !== this.site) {
-        const data = sideBarPreset[site];
         this.site = site;
         this.menu.list = data;
         this.menu.openNames = data.map(e => e.name);
-        this.pageChange(page || data[0].children[0].name);
       }
+      this.pageChange(page || data[0].children[0].name);
     },
 
     pageChange(page) {
@@ -69,6 +68,7 @@ export default {
         .find(e => e.name === page.split('-')[0])
         .children.find(e => e.name === page);
       this.$root.pageType = target.pageType;
+      this.$emit('pageChange', target.pageType);  // 向父级组件Site.vue触发事件
       this.$root.page = page;
       this.menu.activeName = page;
       this.$nextTick(() => {
