@@ -4,7 +4,7 @@ const config = require('./db.config');
 
 // 打开连接
 function connect(callback) {
-  MongoClient.connect(`mongodb://${config.user}:${config.passwd}@${config.ip}:${config.port}/${config.database}`, (err, db) => {
+  MongoClient.connect(`mongodb://${config.user}:${config.pwd}@${config.ip}:${config.port}/${config.database}`, (err, db) => {
     err ? callback(err) : callback(null, db);
   });
 }
