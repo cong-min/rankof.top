@@ -1,6 +1,12 @@
 // 网易云音乐
-function updateTimeRender(updateTime, value) {
-  return `<Poptip trigger="hover" :content="${updateTime} | formatTime('更新时间：')" placement="bottom-end">${value}<Poptip>`;
+/* eslint-disable no-unused-vars */
+import Poptip from 'iview/src/components/poptip';
+import formatTimer from '@/filters/formatTimer';
+
+function updateTimeRender(h, updateTime, value) {
+  return (
+    <Poptip trigger="hover" content={ formatTimer('time')(updateTime, '更新时间：') } placement="bottom-end">{value}</Poptip>
+  );
 }
 
 export default {
@@ -21,15 +27,19 @@ export default {
       {
         title: '歌曲',
         key: 'name',
-        render(row) {
-          return `<a href="http://music.163.com/#/song?id=${row._id}" target="_blank">${row.name}</a>`;
+        render(h, { row }) {
+          return (
+            <a href={`http://music.163.com/#/song?id=${row._id}`} target="_blank">{row.name}</a>
+          );
         },
       },
       {
         title: '歌手',
         key: 'artist',
-        render(row) {
-          return `<a href="http://music.163.com/#/artist?id=${row.artist.id}" target="_blank">${row.artist.name}</a>`;
+        render(h, { row }) {
+          return (
+            <a href={`http://music.163.com/#/artist?id=${row.artist.id}`} target="_blank">{row.artist.name}</a>
+          );
         },
       },
     ],
@@ -38,8 +48,8 @@ export default {
       title: '评论数',
       key: 'comment',
       align: 'center',
-      render(row) {
-        return updateTimeRender(row.comment.updateTime, row.comment.total);
+      render(h, { row }) {
+        return updateTimeRender(h, row.comment.updateTime, row.comment.total);
       },
     }],
   },
@@ -57,15 +67,21 @@ export default {
         title: '歌曲',
         key: 'name',
         width: 180,
-        render(row) {
-          return `<a href="http://music.163.com/#/song?id=${row._id}" target="_blank">${row.name} - ${row.artist.name}</a>`;
+        render(h, { row }) {
+          return (
+            <a href={`http://music.163.com/#/song?id=${row._id}`} target="_blank">{row.name} - {row.artist.name}</a>
+          );
         },
       },
       {
         title: '评论内容',
         key: 'comment',
-        render(row) {
-          return `<strong>@${row.comment.hottest.nickname}</strong>：${row.comment.hottest.content}`;
+        render(h, { row }) {
+          return (
+            <span>
+              <strong>@{row.comment.hottest.nickname}</strong>：{row.comment.hottest.content}
+            </span>
+          );
         },
       },
     ],
@@ -75,8 +91,8 @@ export default {
       key: 'comment',
       align: 'center',
       width: 100,
-      render(row) {
-        return updateTimeRender(row.comment.updateTime, row.comment.hottest.count);
+      render(h, { row }) {
+        return updateTimeRender(h, row.comment.updateTime, row.comment.hottest.count);
       },
     }],
   },
@@ -93,8 +109,10 @@ export default {
       {
         title: '歌单',
         key: 'name',
-        render(row) {
-          return `<a href="http://music.163.com/#/playlist?id=${row._id}" target="_blank">${row.name}</a>`;
+        render(h, { row }) {
+          return (
+            <a href={`http://music.163.com/#/playlist?id=${row._id}`} target="_blank">{row.name}</a>
+          );
         },
       },
     ],
@@ -103,8 +121,8 @@ export default {
       title: '播放量',
       key: 'playCount',
       align: 'center',
-      render(row) {
-        return updateTimeRender(row.updateTime, row.playCount);
+      render(h, { row }) {
+        return updateTimeRender(h, row.updateTime, row.playCount);
       },
     }],
     // 收藏最多的歌单
@@ -112,8 +130,8 @@ export default {
       title: '收藏量',
       key: 'subscribedCount',
       align: 'center',
-      render(row) {
-        return updateTimeRender(row.updateTime, row.subscribedCount);
+      render(h, { row }) {
+        return updateTimeRender(h, row.updateTime, row.subscribedCount);
       },
     }],
     // 播放最多的歌单
@@ -121,8 +139,8 @@ export default {
       title: '分享量',
       key: 'shareCount',
       align: 'center',
-      render(row) {
-        return updateTimeRender(row.updateTime, row.shareCount);
+      render(h, { row }) {
+        return updateTimeRender(h, row.updateTime, row.shareCount);
       },
     }],
     // 评论最多的歌单
@@ -130,8 +148,8 @@ export default {
       title: '评论数',
       key: 'commentCount',
       align: 'center',
-      render(row) {
-        return updateTimeRender(row.updateTime, row.commentCount);
+      render(h, { row }) {
+        return updateTimeRender(h, row.updateTime, row.commentCount);
       },
     }],
   },
@@ -148,8 +166,10 @@ export default {
       {
         title: '歌手',
         key: 'name',
-        render(row) {
-          return `<a href="http://music.163.com/#/artist?id=${row._id}" target="_blank">${row.name}</a>`;
+        render(h, { row }) {
+          return (
+            <a href={`http://music.163.com/#/artist?id=${row._id}`} target="_blank">{row.name}</a>
+          );
         },
       },
     ],
@@ -158,8 +178,8 @@ export default {
       title: '单曲数',
       key: 'musicSize',
       align: 'center',
-      render(row) {
-        return updateTimeRender(row.updateTime, row.musicSize);
+      render(h, { row }) {
+        return updateTimeRender(h, row.updateTime, row.musicSize);
       },
     }],
     // 专辑最多的歌手
@@ -167,8 +187,8 @@ export default {
       title: '专辑数',
       key: 'albumSize',
       align: 'center',
-      render(row) {
-        return updateTimeRender(row.updateTime, row.albumSize);
+      render(h, { row }) {
+        return updateTimeRender(h, row.updateTime, row.albumSize);
       },
     }],
     // MV最多的歌手
@@ -176,8 +196,8 @@ export default {
       title: 'MV数',
       key: 'mvSize',
       align: 'center',
-      render(row) {
-        return updateTimeRender(row.updateTime, row.mvSize);
+      render(h, { row }) {
+        return updateTimeRender(h, row.updateTime, row.mvSize);
       },
     }],
   },

@@ -2,6 +2,27 @@
 module.exports = router => {
   const prefix = '/api/cloud-music';
 
+
+  // 歌曲评论数统计
+  router.get(`${prefix}/song-comment/statistic`, (req, res, next) => {
+    const dbSongs = global.db.collection('cloud-music:songs');
+    function countTotal(value) {
+      return new Promise((resolve, reject) => {
+        dbSongs.count({'comment.total': { $gte: value }})
+          .then(count => {
+            resolve({
+              ['gte' + value]: count
+            });
+          });
+      });
+    }
+    // 评论数超10万、5万、1万
+    const promises = [100000, 50000, 10000].map(countTotal);
+    Promise.all(promises).then((counts) => {
+      res.status(200).send(Object.assign({}, ...counts));
+    });
+  });
+
   // 请求响应
   function response({ req, res, next }, { err, docs }, db, updateTime) {
     if (err) { res.status(500).send(err); } else {
@@ -18,7 +39,7 @@ module.exports = router => {
   router.get(`${prefix}/song-comment`, (req, res, next) => {
     const dbSongs = global.db.collection('cloud-music:songs');
     dbSongs.find({ 'comment.updateTime': { $ne: null } })
-      .sort({ 'comment.total': -1}).limit(100)
+      .sort({ 'comment.total': -1 }).limit(100)
       .toArray((err, docs) => {
         response(
           { req, res, next },
@@ -33,7 +54,7 @@ module.exports = router => {
   router.get(`${prefix}/comment-like`, (req, res, next) => {
     const dbSongs = global.db.collection('cloud-music:songs');
     dbSongs.find({ 'comment.hottest.count': { $ne: null } })
-      .sort({ 'comment.hottest.count': -1}).limit(50)
+      .sort({ 'comment.hottest.count': -1 }).limit(50)
       .toArray((err, docs) => {
         response(
           { req, res, next },
@@ -48,7 +69,7 @@ module.exports = router => {
   router.get(`${prefix}/playlist-play`, (req, res, next) => {
     const dbPlaylists = global.db.collection('cloud-music:playlists');
     dbPlaylists.find({ 'playCount': { $nin: [ null, 0 ] } })
-      .sort({ 'playCount': -1}).limit(20)
+      .sort({ 'playCount': -1 }).limit(20)
       .toArray((err, docs) => {
         response(
           { req, res, next },
@@ -62,7 +83,7 @@ module.exports = router => {
   router.get(`${prefix}/playlist-star`, (req, res, next) => {
     const dbPlaylists = global.db.collection('cloud-music:playlists');
     dbPlaylists.find({ 'subscribedCount': { $nin: [ null, 0 ] } })
-      .sort({ 'subscribedCount': -1}).limit(20)
+      .sort({ 'subscribedCount': -1 }).limit(20)
       .toArray((err, docs) => {
         response(
           { req, res, next },
@@ -76,7 +97,7 @@ module.exports = router => {
   router.get(`${prefix}/playlist-share`, (req, res, next) => {
     const dbPlaylists = global.db.collection('cloud-music:playlists');
     dbPlaylists.find({ 'shareCount': { $nin: [ null, 0 ] } })
-      .sort({ 'shareCount': -1}).limit(20)
+      .sort({ 'shareCount': -1 }).limit(20)
       .toArray((err, docs) => {
         response(
           { req, res, next },
@@ -90,7 +111,7 @@ module.exports = router => {
   router.get(`${prefix}/playlist-comment`, (req, res, next) => {
     const dbPlaylists = global.db.collection('cloud-music:playlists');
     dbPlaylists.find({ 'commentCount': { $nin: [ null, 0 ] } })
-      .sort({ 'commentCount': -1}).limit(20)
+      .sort({ 'commentCount': -1 }).limit(20)
       .toArray((err, docs) => {
         response(
           { req, res, next },
@@ -105,7 +126,7 @@ module.exports = router => {
   router.get(`${prefix}/artist-song`, (req, res, next) => {
     const dbArtists = global.db.collection('cloud-music:artists');
     dbArtists.find({ 'musicSize': { $nin: [ null, 0 ] } })
-      .sort({ 'musicSize': -1}).limit(50)
+      .sort({ 'musicSize': -1 }).limit(50)
       .toArray((err, docs) => {
         response(
           { req, res, next },
@@ -119,7 +140,7 @@ module.exports = router => {
   router.get(`${prefix}/artist-album`, (req, res, next) => {
     const dbArtists = global.db.collection('cloud-music:artists');
     dbArtists.find({ 'albumSize': { $nin: [ null, 0 ] } })
-      .sort({ 'albumSize': -1}).limit(50)
+      .sort({ 'albumSize': -1 }).limit(50)
       .toArray((err, docs) => {
         response(
           { req, res, next },
@@ -133,7 +154,7 @@ module.exports = router => {
   router.get(`${prefix}/artist-mv`, (req, res, next) => {
     const dbArtists = global.db.collection('cloud-music:artists');
     dbArtists.find({ 'mvSize': { $nin: [ null, 0 ] } })
-      .sort({ 'mvSize': -1}).limit(50)
+      .sort({ 'mvSize': -1 }).limit(50)
       .toArray((err, docs) => {
         response(
           { req, res, next },

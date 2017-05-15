@@ -1,12 +1,12 @@
 <template>
   <div>
-    <!-- 内容 -->
-    <div v-if="loading">
+    <Affix v-if="loading" :offset-top="50">
       <Spin>
         <Icon type="load-c" size="18" class="loading"></Icon>
         <div>加载中...</div>
       </Spin>
-    </div>
+    </Affix>
+    <!-- 内容 -->
     <template v-else>
       <p class="page-note">
         <span class="page-note-left" v-if="total">不完全统计共 {{ total }} 个{{ dataType }}，最后更新时间：{{ updateTime | formatDate }}</span>
@@ -61,7 +61,7 @@ export default {
       this.listColumn = $column.concat(siteData[pre][suf]); // 合并数据
       // 获取listData
       this.$http.get(`/api/${site}/${page}`).then((res) => {
-        if (res.status === 200) {
+        if (res.status < 400) {
           this.listData = res.body.listData;
           this.total = res.body.total;
           this.updateTime = res.body.updateTime;
