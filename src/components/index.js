@@ -31,8 +31,8 @@ Vue.component('animated-integer', {
         TWEEN.update(time);
       }
       new TWEEN.Tween({ tweeningValue: startValue })
-        .to({ tweeningValue: endValue }, 1000)
-        .onUpdate(function () {
+        .to({ tweeningValue: endValue }, 800)
+        .onUpdate(() => {
           vm.tweeningValue = this.tweeningValue.toFixed(0);
         })
         .start();

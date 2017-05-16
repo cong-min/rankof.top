@@ -1,7 +1,7 @@
 <template>
   <Menu ref="navBarMenu" mode="horizontal" theme="primary" :active-name="menu.activeName" width="auto" @on-select="selectLink">
     <menu-item class="logo" name="home">Rank of Top</menu-item>
-    <Menu-item v-for="item in menu.list" :key="item.name" :name="item.name">
+    <Menu-item v-for="item in menu.list" :key="item.name" :name="item.name" v-if="item.enable">
       <Icon :type="item.icon"></Icon>
       {{ item.title }}
     </Menu-item>
@@ -10,17 +10,15 @@
 </template>
 
 <script>
+import navList from './navBarPreset/list';
+
 export default {
 
   data() {
     return {
       menu: {
         activeName: this.$route.params.site || 'home',
-        list: [
-          { name: 'cloud-music', title: '网易云音乐', icon: 'music-note' },
-//          { name: 'zhihu', title: '知乎', icon: 'chatbox-working' },
-//          { name: 'weibo', title: '微博', icon: 'social-rss' },
-        ],
+        list: navList,
       },
     };
   },

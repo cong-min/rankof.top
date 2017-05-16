@@ -1,6 +1,6 @@
 // 网易云音乐
 /* eslint-disable no-unused-vars */
-import Poptip from 'iview/src/components/poptip';
+import { Poptip } from 'iview';
 import formatTimer from '@/filters/formatTimer';
 
 function updateTimeRender(h, updateTime, value) {

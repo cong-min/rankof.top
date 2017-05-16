@@ -3,7 +3,7 @@
     <!-- 导航栏 -->
     <nav-bar></nav-bar>
     <!-- 路由正文 -->
-    <router-view></router-view>
+    <router-view class="wrapper-view"></router-view>
     <!-- 返回顶部 -->
     <Back-top>
       <div class="back-top">
@@ -28,6 +28,16 @@ export default {
 </script>
 
 <style>
+html {
+  height: 100%;
+}
+body {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -35,6 +45,10 @@ export default {
   color: #657180;
 }
 .wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   min-height: 100%;
   background: #e3e8ee;
 }
@@ -60,6 +74,9 @@ export default {
   bottom: 0;
   left: -1px;
 }
+.wrapper-view{
+  flex: 1;
+}
 .back-top {
   background: rgba(0, 153, 229, .7);
   font-size: 24px;
@@ -71,8 +88,10 @@ export default {
   background: rgba(0, 153, 229, .8);
 }
 .copy {
+  width: 200px;
   display: block;
   text-align: center;
+  margin: 0 auto;
   padding: 10px 0 20px;
   color: #9ea7b4;
 }

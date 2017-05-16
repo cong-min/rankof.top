@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, '../dist')));
 
 app.use(api);
 
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
   const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf-8');
   res.send(html)
 });
