@@ -25,6 +25,7 @@ Vue.component('animated-integer', {
   },
   methods: {
     tween(startValue, endValue) {
+      if (startValue === endValue) return;
       const vm = this;
       function animate(time) {
         requestAnimationFrame(animate);
@@ -32,7 +33,8 @@ Vue.component('animated-integer', {
       }
       new TWEEN.Tween({ tweeningValue: startValue })
         .to({ tweeningValue: endValue }, 800)
-        .onUpdate(() => {
+        // eslint-disable-next-line func-names
+        .onUpdate(function () {
           vm.tweeningValue = this.tweeningValue.toFixed(0);
         })
         .start();
