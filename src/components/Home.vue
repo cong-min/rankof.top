@@ -78,10 +78,10 @@ export default {
   border-radius: 3px;
   cursor: pointer;
 }
-/*.home-item.disable img {
+.home-item.disable img {
   filter: grayscale(100%);
   opacity: 0.66;
-}*/
+}
 .home-item:hover {
   box-shadow: none;
   border-color: #5cadff;
