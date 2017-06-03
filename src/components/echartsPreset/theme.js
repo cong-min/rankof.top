@@ -172,7 +172,6 @@ export default {
       }
     },
     "symbolSize": "8",
-    "symbol": "emptyCircle",
     "smooth": false,
     "color": [
       // "#3fb1e3",
@@ -186,7 +185,7 @@ export default {
     "label": {
       "normal": {
         "textStyle": {
-          "color": "#ffffff"
+          "fontSize": 10
         }
       }
     }

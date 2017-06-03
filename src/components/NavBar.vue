@@ -18,7 +18,8 @@ export default {
     return {
       menu: {
         activeName: this.$route.params.site || 'home',
-        list: navList,
+        // 随机排序，启用在前，未启用在后
+        list: navList.sort((a, b) => (b.enable - a.enable || Math.random() - 0.5)),
       },
     };
   },

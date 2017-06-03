@@ -37,6 +37,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  background: #e3e8ee;
 }
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;

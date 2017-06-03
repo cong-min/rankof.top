@@ -2,7 +2,6 @@
 module.exports = router => {
   const prefix = '/api/cloud-music';
 
-
   // 歌曲评论数统计
   router.get(`${prefix}/song-comment/statistic`, (req, res, next) => {
     const dbSongs = global.db.collection('cloud-music:songs');
@@ -20,6 +19,58 @@ module.exports = router => {
     const promises = [100000, 50000, 10000].map(countTotal);
     Promise.all(promises).then((counts) => {
       res.status(200).send(Object.assign({}, ...counts));
+    });
+  });
+
+  // 用户对歌单操作统计
+  router.get(`${prefix}/playlist-user-action`, (req, res, next) => {
+    const dbPlaylists = global.db.collection('cloud-music:playlists');
+    dbPlaylists.aggregate([
+      {
+        '$group': {
+          _id: null,
+          commentCountTotal: { $sum: '$commentCount' },
+          shareCountTotal: { $sum: '$shareCount' },
+          subscribedCountTotal: { $sum: '$subscribedCount' },
+          playCountTotal: { $sum: '$playCount' },
+        }
+      }
+    ], (err, docs) => {
+      res.status(200).send({
+        data: docs[0]
+      });
+    });
+  });
+
+  // 网易云音乐热点图
+  router.get(`${prefix}/hotspot`, (req, res, next) => {
+    const dbSongs = global.db.collection('cloud-music:songs');
+    dbSongs.aggregate([
+      { $sort: { "artist.id": 1, "comment.total": -1 } },
+      {
+        $group: {
+          _id: "$artist.id",
+          name: { $first: "$artist.name" },
+          commentSize: { $sum: "$comment.total" },
+          songs: {
+            $push: { id: '$_id', name: '$name', comment: '$comment.total' }
+          },
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          commentSize: 1,
+          songs: { $slice: [ '$songs', 6 ] }
+        }
+      },
+      { $match: { _id: { $gt : 0 } } },
+      { $sort: { 'commentSize': -1 } },
+      { $limit: 15 }
+    ], { allowDiskUse: true }, (err, docs) => {
+      res.status(200).send({
+        data: docs
+      });
     });
   });
 
@@ -160,6 +211,30 @@ module.exports = router => {
           { req, res, next },
           { err, docs },
           dbArtists,
+          docs[0].updateTime  // updateTime
+        );
+      });
+  });
+  // 歌曲评论数最多的歌手 Top50
+  router.get(`${prefix}/artist-comment`, (req, res, next) => {
+    const dbSongs = global.db.collection('cloud-music:songs');
+    dbSongs.aggregate([
+        {
+          $group: {
+            _id: "$artist.id",
+            name: { $first: "$artist.name" },
+            commentSize: { $sum: "$comment.total" },
+            updateTime: { $max: "$comment.updateTime" },
+          }
+        },
+        { $match: { _id: { $gt : 0 } } },
+        { $sort: { 'commentSize': -1 } },
+        { $limit: 50 }
+      ], (err, docs) => {
+        response(
+          { req, res, next },
+          { err, docs },
+          dbSongs,
           docs[0].updateTime  // updateTime
         );
       });

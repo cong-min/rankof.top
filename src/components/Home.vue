@@ -27,7 +27,8 @@ export default {
 
   data() {
     return {
-      navList: navList.sort(() => (Math.random() - 0.5)),
+      // navList在NavBar.Vue中已随机排序
+      navList,
     };
   },
 

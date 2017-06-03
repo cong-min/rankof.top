@@ -44,7 +44,7 @@ export default {
       },
     ],
     // 评论数最多的歌曲
-    comment: [{
+    'song-comment': [{
       title: '评论数',
       key: 'comment',
       align: 'center',
@@ -86,7 +86,7 @@ export default {
       },
     ],
     // 点赞数最多的歌曲评论
-    like: [{
+    'comment-like': [{
       title: '评论赞数',
       key: 'comment',
       align: 'center',
@@ -117,7 +117,7 @@ export default {
       },
     ],
     // 播放最多的歌单
-    play: [{
+    'playlist-play': [{
       title: '播放量',
       key: 'playCount',
       align: 'center',
@@ -126,7 +126,7 @@ export default {
       },
     }],
     // 收藏最多的歌单
-    star: [{
+    'playlist-star': [{
       title: '收藏量',
       key: 'subscribedCount',
       align: 'center',
@@ -135,7 +135,7 @@ export default {
       },
     }],
     // 播放最多的歌单
-    share: [{
+    'playlist-share': [{
       title: '分享量',
       key: 'shareCount',
       align: 'center',
@@ -144,7 +144,7 @@ export default {
       },
     }],
     // 评论最多的歌单
-    comment: [{
+    'playlist-comment': [{
       title: '评论数',
       key: 'commentCount',
       align: 'center',
@@ -174,7 +174,7 @@ export default {
       },
     ],
     // 单曲最多的歌手
-    song: [{
+    'artist-song': [{
       title: '单曲数',
       key: 'musicSize',
       align: 'center',
@@ -183,7 +183,7 @@ export default {
       },
     }],
     // 专辑最多的歌手
-    album: [{
+    'artist-album': [{
       title: '专辑数',
       key: 'albumSize',
       align: 'center',
@@ -192,12 +192,21 @@ export default {
       },
     }],
     // MV最多的歌手
-    mv: [{
+    'artist-mv': [{
       title: 'MV数',
       key: 'mvSize',
       align: 'center',
       render(h, { row }) {
         return updateTimeRender(h, row.updateTime, row.mvSize);
+      },
+    }],
+    // 歌曲评论数最多的歌手
+    'artist-comment': [{
+      title: '歌曲评论总数',
+      key: 'commentSize',
+      align: 'center',
+      render(h, { row }) {
+        return updateTimeRender(h, row.updateTime, row.commentSize);
       },
     }],
   },

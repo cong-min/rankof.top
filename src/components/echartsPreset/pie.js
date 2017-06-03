@@ -38,8 +38,8 @@ const init = (title, name) => ({
       itemStyle: {
         normal: {
           color: '#5cadff',
-          shadowBlur: 150,
-          shadowColor: 'rgba(0, 0, 0, 0.3)',
+          shadowBlur: 100,
+          shadowColor: 'rgba(0,0,0,.1)',
         },
       },
       animationType: 'scale',
@@ -52,6 +52,7 @@ const init = (title, name) => ({
 const update = (data, name) => ({
   series: [{
     name,
+    type: 'pie',
     data: data.sort((a, b) => a.value - b.value),
   }],
 });

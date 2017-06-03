@@ -96,4 +96,8 @@ export default {
 .ivu-menu-item-selected .right-icon {
   color: #39f;
 }
+.ivu-menu-vertical .ivu-menu-item,
+.ivu-menu-vertical .ivu-menu-submenu-title {
+  padding: 14px 20px 14px 24px;
+}
 </style>

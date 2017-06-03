@@ -25,6 +25,12 @@ const init = (title, name) => ({
       },
     },
   },
+  grid: {
+    left: '2%',
+    right: '5%',
+    bottom: '2%',
+    containLabel: true,
+  },
   xAxis: {
     show: false,
     data: [],
@@ -49,7 +55,7 @@ const init = (title, name) => ({
 // set data
 const update = (xdata, ydata, name) => ({
   xAxis: { data: xdata },
-  series: [{ name, data: ydata }],
+  series: [{ name, type: 'bar', data: ydata }],
 });
 // loading
 const loading = (ref) => {

@@ -1,12 +1,19 @@
 // 网易云音乐
 export default [
   {
+    name: 'visual',
+    title: '网易云音乐',
+    icon: 'ios-pulse-strong',
+    children: [
+      { name: 'visual', title: '综合统计与可视化分析', pageType: 'visual' },
+    ],
+  },
+  {
     name: 'song',
     title: '歌曲',
     icon: 'music-note',
     children: [
       { name: 'song-comment', title: '评论数最多的歌曲 Top100', pageType: 'rankList' },
-      { name: 'song-visual', title: '歌曲数据统计与可视化分析', pageType: 'visual', icon: 'ios-pulse-strong' },
     ],
   },
   {
@@ -36,6 +43,7 @@ export default [
       { name: 'artist-song', title: '单曲最多的歌手 Top50', pageType: 'rankList' },
       { name: 'artist-album', title: '专辑最多的歌手 Top50', pageType: 'rankList' },
       { name: 'artist-mv', title: 'MV最多的歌手 Top50', pageType: 'rankList' },
+      { name: 'artist-comment', title: '歌曲评论总数最多的歌手 Top50', pageType: 'rankList' },
     ],
   },
 ];

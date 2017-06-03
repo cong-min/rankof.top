@@ -20,8 +20,7 @@
       </Col>
     </Row>
     <template v-for="chart in visualData">
-      <Chart class="chart" theme="walden" :key="chart.title" :ref="chart.title"
-             :options="chart.initOptions"></Chart>
+      <Chart class="chart" :class="'chart-'+chart.size" theme="walden" :key="chart.title" :ref="chart.title" :options="chart.initOptions" auto-resize></Chart>
     </template>
   </div>
 </template>
@@ -31,6 +30,7 @@ import ECharts from 'vue-echarts/components/ECharts.vue';
 import 'echarts/lib/chart/line';
 import 'echarts/lib/chart/pie';
 import 'echarts/lib/chart/bar';
+import 'echarts/lib/chart/graph';
 import 'echarts/lib/component/title';
 import 'echarts/lib/component/toolbox';
 import 'echarts/lib/component/tooltip';
@@ -102,6 +102,7 @@ export default {
         type: e.type,
         title: e.title,
         label: e.label,
+        size: e.size,
         initOptions: echartsPreset[e.type].init(e.title, e.label),    // init options
       }));
       // 可视数据 请求
@@ -139,6 +140,18 @@ export default {
 .chart {
   margin: 0 auto;
   padding: 15px 0;
+}
+.chart-md {
+  width: 600px;
+  height: 400px;
+}
+.chart-sm {
+  width: 400px;
+  height: 300px;
+}
+.chart-lg {
+  width: 700px;
+  height: 600px;
 }
 .page-note {
   color: #9ea7b4;

@@ -54,11 +54,11 @@ export default {
       // siteData表示该site的column数据
       const siteData = rankListPreset[site];
       // pre表示大类，suf表示小类
-      const [pre, suf] = page.split('-');
+      const pre = page.split('-')[0];
       const $column = siteData[pre].$column;
       this.dataType = siteData[pre].$dataType;    // 数据类型
       this.source = siteData.$source;   // 数据来源
-      this.listColumn = $column.concat(siteData[pre][suf]); // 合并数据
+      this.listColumn = $column.concat(siteData[pre][page]); // 合并数据
       // 获取listData
       this.$http.get(`/api/${site}/${page}`).then((res) => {
         if (res.status < 400) {
