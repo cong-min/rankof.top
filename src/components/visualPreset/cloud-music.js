@@ -82,11 +82,10 @@ export default {
         parsing: (result, Chart) => {
           // 解析数据
           const data = [
-            { name: '收藏量/播放量', value: (100 * result.data.subscribedCountTotal / result.data.playCountTotal).toFixed(4)  },
-            { name: '分享量/收藏量', value: (100 * result.data.shareCountTotal / result.data.subscribedCountTotal).toFixed(4) },
-            { name: '评论量/收藏量', value: (100 * result.data.commentCountTotal / result.data.subscribedCountTotal).toFixed(4) },
+            { name: '收藏量/播放量', value: (100 * (result.data.subscribedCountTotal / result.data.playCountTotal)).toFixed(4) },
+            { name: '分享量/收藏量', value: (100 * (result.data.shareCountTotal / result.data.subscribedCountTotal)).toFixed(4) },
+            { name: '评论量/收藏量', value: (100 * (result.data.commentCountTotal / result.data.subscribedCountTotal)).toFixed(4) },
           ];
-          console.log(data);
           return {
             data: Chart.update(data, '%'),
             total: result.total,
