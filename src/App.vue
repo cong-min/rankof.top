@@ -54,6 +54,7 @@ body {
   background: #e3e8ee;
 }
 .container {
+  display: flex;
   min-height: 200px;
   background: #fff;
   width: 90%;

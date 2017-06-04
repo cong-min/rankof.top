@@ -22,6 +22,9 @@
     <template v-for="chart in visualData">
       <Chart class="chart" :class="'chart-'+chart.size" theme="walden" :key="chart.title" :ref="chart.title" :options="chart.initOptions" auto-resize></Chart>
     </template>
+    <Spin v-if="!visualData.length">
+      <div>暂无数据</div>
+    </Spin>
   </div>
 </template>
 
@@ -71,6 +74,7 @@ export default {
   methods: {
     getVisualData() {
       const vm = this;
+      Object.assign(vm.$data, vm.$options.data());
       const { site, page } = vm.$root;
       const siteData = visualPreset[site];
       const pageData = siteData[page];
@@ -112,10 +116,12 @@ export default {
           const Chart = echartsPreset[e.type];    // Chart预设模块
           Chart.loading($chart);
           this.$http.get(`/api/${site}/${e.requestPath}`).then((res) => {
+            // eslint-disable-next-line no-underscore-dangle
+            if ($chart._isDestroyed) return;
             if (res.status < 400) {
               // 处理解析数据
               const { data, total, updateTime } = e.parsing(res.body, Chart);
-              $chart.mergeOptions(data);    // merge options
+              $chart.mergeOptions(data);  // merge options
               if (total) { this.total = total; }
               if (updateTime) { this.updateTime = updateTime; }
             } else {
